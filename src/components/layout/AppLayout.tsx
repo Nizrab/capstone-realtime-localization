@@ -24,6 +24,7 @@ const navItems = [
   { path: '/alerts', label: 'Alerts', icon: Bell },
   { path: '/playback', label: 'Playback', icon: PlayCircle },
   { path: '/dashboards', label: 'Dashboards', icon: BarChart3 },
+  { path: '/patients', label: 'Patients', icon: Activity },
   { path: '/admin', label: 'Admin', icon: Settings },
 ];
 

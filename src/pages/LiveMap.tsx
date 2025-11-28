@@ -51,23 +51,36 @@ export default function LiveMap() {
   const [showGeofences, setShowGeofences] = useState(true);
 
   useEffect(() => {
-    // Initialize mock data
-    setAnchors(mockAnchors);
-    setTags(mockTags.slice(0, 15)); // Show 15 tags on map
-    
-    // Simulate periodic updates
-    const interval = setInterval(() => {
-      // Update tag positions slightly (simulate movement)
-      setTags((prev) =>
-        prev.map((tag) => ({
-          ...tag,
-          lastSeen: new Date().toISOString(),
-        }))
-      );
-    }, 2000);
+  // Load anchors only — tags come from API now
+  setAnchors(mockAnchors);
+}, [setAnchors]);
 
-    return () => clearInterval(interval);
-  }, [setAnchors, setTags]);
+// Fetch live tag positions from backend API
+useEffect(() => {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch("http://174.91.138.238:3077/positions");
+      const data = await res.json();
+
+      const apiTags = data.tags.map((t: any) => ({
+        id: t.id,
+        label: `Tag ${t.id}`,
+        tech: "UWB",
+        status: "online",
+        batteryPct: 100,
+        sensors: {},
+        position: { x: t.x, y: t.y },
+      }));
+
+      setTags(apiTags);
+    } catch (err) {
+      console.error("API error:", err);
+    }
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [setTags]);
+
 
   const bounds = L.latLngBounds(
     [0, 0],
@@ -75,11 +88,8 @@ export default function LiveMap() {
   );
 
   // Calculate tag positions (simplified - in real app would come from tracks)
-  const tagPositions = tags.map((tag) => {
-    const x = 5 + Math.random() * 30;
-    const y = 5 + Math.random() * 10;
-    return { ...tag, position: { x, y } };
-  });
+  const tagPositions = tags;
+
 
   return (
     <div className="h-full flex">
