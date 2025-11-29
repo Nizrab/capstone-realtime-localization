@@ -20,7 +20,7 @@ export default function Patients() {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch("http://174.91.138.238:3077/patients");
+      const res = await fetch("https://microstylous-movelessly-herbert.ngrok-free.dev/positions");
       const data = await res.json();
 
       if (data.patients) {
