@@ -20,7 +20,7 @@ export default function Patients() {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch("https://microstylous-movelessly-herbert.ngrok-free.dev/positions");
+      const res = await fetch("https://174-91-138-238.sslip.io/patients");
       const data = await res.json();
 
       if (data.patients) {
