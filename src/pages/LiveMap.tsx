@@ -59,7 +59,8 @@ export default function LiveMap() {
 useEffect(() => {
   const interval = setInterval(async () => {
     try {
-      const res = await fetch("http://174.91.138.238:3077/positions");
+      const res = await fetch("https://174-91-138-238.sslip.io/positions")
+;
       const data = await res.json();
 
       const apiTags = data.tags.map((t: any) => ({
