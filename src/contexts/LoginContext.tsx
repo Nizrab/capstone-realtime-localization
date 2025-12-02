@@ -2,16 +2,15 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 export interface User {
   id: string;
-  email: string;
-  name: string;
-  role: string;
+  username: string;
+  role: 'admin' | 'nurse' | 'backend';
 }
 
 interface LoginContextType {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -35,22 +34,33 @@ export function LoginProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Mock authentication - replace with real API call
+      // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Mock user based on email
+      // Hardcoded demo accounts
+      const accounts = [
+        { username: 'admin', password: 'admin123', role: 'admin' as const },
+        { username: 'nurse', password: 'nurse123', role: 'nurse' as const },
+        { username: 'backend', password: 'backend123', role: 'backend' as const },
+      ];
+
+      const account = accounts.find(
+        (acc) => acc.username === username && acc.password === password
+      );
+
+      if (!account) {
+        throw new Error('Invalid username or password');
+      }
+
       const mockUser: User = {
         id: Math.random().toString(36).substr(2, 9),
-        email,
-        name: email.split('@')[0],
-        role: email.includes('admin') ? 'admin' : 
-              email.includes('clinician') ? 'clinician' :
-              email.includes('nurse') ? 'nurse' : 'guest',
+        username: account.username,
+        role: account.role,
       };
 
       setUser(mockUser);

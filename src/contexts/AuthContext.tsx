@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useLogin } from './LoginContext';
 
-type AppRole = 'admin' | 'clinician' | 'nurse' | 'guest';
+type AppRole = 'admin' | 'nurse' | 'backend';
 
 interface AuthContextType {
   roles: AppRole[];
@@ -16,17 +16,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { user } = useLogin();
 
   const roles = useMemo<AppRole[]>(() => {
-    if (!user) return ['guest'];
+    if (!user) return [];
     
-    // In a real app, roles would come from the backend
-    const userRoles: AppRole[] = [user.role as AppRole];
-    
-    // Add guest role to all users
-    if (!userRoles.includes('guest')) {
-      userRoles.push('guest');
-    }
-    
-    return userRoles;
+    // User has only their assigned role
+    return [user.role as AppRole];
   }, [user]);
 
   const hasRole = (role: AppRole): boolean => {

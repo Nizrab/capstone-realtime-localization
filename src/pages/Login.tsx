@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { MapPin, Loader2 } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useLogin();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(username, password);
       navigate('/');
     } catch (err) {
       // Error is handled by context
@@ -36,13 +36,13 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="admin@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              placeholder="admin"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               disabled={isLoading}
             />
@@ -80,11 +80,10 @@ export default function Login() {
         </form>
 
         <div className="text-xs text-muted-foreground space-y-1 bg-muted/50 p-3 rounded-md">
-          <div className="font-semibold mb-2">Test Accounts:</div>
-          <div>• admin@example.com - Admin access</div>
-          <div>• clinician@example.com - Clinician access</div>
-          <div>• nurse@example.com - Nurse access</div>
-          <div>• guest@example.com - Guest access</div>
+          <div className="font-semibold mb-2">Demo Accounts:</div>
+          <div>• <span className="font-mono">admin / admin123</span> - Full access</div>
+          <div>• <span className="font-mono">nurse / nurse123</span> - Patient & clinical data</div>
+          <div>• <span className="font-mono">backend / backend123</span> - System metrics only</div>
         </div>
       </Card>
     </div>

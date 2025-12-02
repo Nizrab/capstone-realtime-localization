@@ -23,14 +23,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
-  { path: '/', label: 'Overview', icon: LayoutDashboard },
-  { path: '/map', label: 'Live Map', icon: Map },
-  { path: '/inventory', label: 'Inventory', icon: Radio },
-  { path: '/alerts', label: 'Alerts', icon: Bell },
-  { path: '/playback', label: 'Playback', icon: PlayCircle },
-  { path: '/dashboards', label: 'Dashboards', icon: BarChart3 },
-  { path: '/patients', label: 'Patients', icon: Activity },
-  { path: '/admin', label: 'Admin', icon: Settings },
+  { path: '/', label: 'Overview', icon: LayoutDashboard, roles: ['admin', 'nurse'] as const },
+  { path: '/map', label: 'Live Map', icon: Map, roles: ['admin', 'nurse'] as const },
+  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin'] as const },
+  { path: '/alerts', label: 'Alerts', icon: Bell, roles: ['admin', 'nurse'] as const },
+  { path: '/playback', label: 'Playback', icon: PlayCircle, roles: ['admin'] as const },
+  { path: '/dashboards', label: 'Dashboards', icon: BarChart3, roles: ['admin', 'nurse', 'backend'] as const },
+  { path: '/patients', label: 'Patients', icon: Activity, roles: ['admin', 'nurse'] as const },
+  { path: '/admin', label: 'Admin', icon: Settings, roles: ['admin', 'backend'] as const },
 ];
 
 export default function AppLayout() {
@@ -74,6 +74,9 @@ export default function AppLayout() {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             const showBadge = item.path === '/alerts' && openAlerts > 0;
+            const hasAccess = hasRole('admin') || item.roles.some((role) => hasRole(role));
+
+            if (!hasAccess) return null;
 
             return (
               <Link
@@ -159,21 +162,21 @@ export default function AppLayout() {
           </Badge>
 
           {/* User Info */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 px-3 py-1.5 rounded-md bg-muted/50">
             <div className="flex items-center gap-2 text-sm">
-              <User className="h-4 w-4" />
-              <div className="flex flex-col">
-                <span className="font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
-              </div>
+              <span className="font-medium">{user.username}</span>
+              <Badge variant="outline" className="text-xs capitalize">
+                {user.role}
+              </Badge>
             </div>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={handleLogout}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
+              title="Logout"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-3.5 w-3.5" />
             </Button>
           </div>
         </header>
