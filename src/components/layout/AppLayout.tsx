@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Map, 
@@ -10,12 +10,17 @@ import {
   Settings,
   Search,
   Activity,
-  MapPin
+  MapPin,
+  LogOut,
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRTLSStore } from '@/store/useRTLSStore';
+import { useLogin } from '@/contexts/LoginContext';
+import { useAuth, RequireRole } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { path: '/', label: 'Overview', icon: LayoutDashboard },
@@ -30,11 +35,28 @@ const navItems = [
 
 export default function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { health, alerts } = useRTLSStore();
+  const { user, logout } = useLogin();
+  const { roles, hasRole } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
   const openAlerts = alerts.filter((a) => a.status === 'open').length;
   const criticalAlerts = alerts.filter((a) => a.status === 'open' && a.severity === 'critical').length;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  if (!user) return null;
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -136,9 +158,23 @@ export default function AppLayout() {
             PILOT
           </Badge>
 
-          {/* User */}
-          <div className="text-sm text-muted-foreground">
-            Operator
+          {/* User Info */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm">
+              <User className="h-4 w-4" />
+              <div className="flex flex-col">
+                <span className="font-medium">{user.name}</span>
+                <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleLogout}
+              className="h-8 w-8 p-0"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </header>
 

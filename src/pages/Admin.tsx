@@ -1,10 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Users, Key, Settings as SettingsIcon, Shield } from 'lucide-react';
+import { Upload, Users, Key, Settings as SettingsIcon, Shield, Lock } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth, RequireRole } from '@/contexts/AuthContext';
+import { useLogin } from '@/contexts/LoginContext';
 
 export default function Admin() {
+  const { hasRole, hasAnyRole } = useAuth();
+  const { user } = useLogin();
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -14,11 +19,49 @@ export default function Admin() {
         </p>
       </div>
 
+      {/* Admin-only banner */}
+      <RequireRole role="admin">
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-primary" />
+              <div>
+                <div className="font-semibold text-sm">Admin Access Active</div>
+                <div className="text-xs text-muted-foreground">
+                  You have full system administrator privileges
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </RequireRole>
+
+      {/* Non-admin warning */}
+      {!hasRole('admin') && (
+        <Card className="border-warning/20 bg-warning/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Lock className="h-5 w-5 text-warning" />
+              <div>
+                <div className="font-semibold text-sm">Limited Access</div>
+                <div className="text-xs text-muted-foreground">
+                  Some features may be restricted based on your role: {user?.role}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="floorplans" className="w-full">
         <TabsList>
           <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
-          <TabsTrigger value="rbac">Roles & Access</TabsTrigger>
-          <TabsTrigger value="api">API Keys</TabsTrigger>
+          <TabsTrigger value="rbac" disabled={!hasAnyRole(['admin', 'clinician'])}>
+            Roles & Access {!hasAnyRole(['admin', 'clinician']) && <Lock className="h-3 w-3 ml-1" />}
+          </TabsTrigger>
+          <TabsTrigger value="api" disabled={!hasRole('admin')}>
+            API Keys {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}
+          </TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
 
@@ -119,7 +162,7 @@ export default function Admin() {
                 <p className="text-sm text-muted-foreground">
                   Manage API keys for external integrations
                 </p>
-                <Button size="sm">Generate New Key</Button>
+                {hasRole('admin') && <Button size="sm">Generate New Key</Button>}
               </div>
 
               <div className="space-y-2">

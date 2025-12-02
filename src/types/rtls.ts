@@ -53,6 +53,8 @@ export interface Tag {
   };
   firmware: string;
   lastSeen: string;
+  position?: { x: number; y: number };
+  status?: string;
 }
 
 export interface TrackPoint {
