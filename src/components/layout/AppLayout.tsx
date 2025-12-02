@@ -162,21 +162,19 @@ export default function AppLayout() {
           </Badge>
 
           {/* User Info */}
-          <div className="flex items-center gap-3 px-3 py-1.5 rounded-md bg-muted/50">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium">{user.username}</span>
-              <Badge variant="outline" className="text-xs capitalize">
-                {user.role}
-              </Badge>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{user.username}</span>
+            <Badge variant="outline" className="text-xs capitalize">
+              {user.role}
+            </Badge>
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={handleLogout}
-              className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
+              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
               title="Logout"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </header>

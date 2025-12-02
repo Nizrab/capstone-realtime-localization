@@ -59,8 +59,8 @@ export default function Admin() {
           <TabsTrigger value="rbac" disabled={!hasRole('admin')}>
             Roles & Access {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}
           </TabsTrigger>
-          <TabsTrigger value="api" disabled={!hasRole('admin')}>
-            API Keys {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}
+          <TabsTrigger value="api" disabled={!hasAnyRole(['admin', 'backend'])}>
+            API Keys {!hasAnyRole(['admin', 'backend']) && <Lock className="h-3 w-3 ml-1" />}
           </TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
@@ -123,25 +123,32 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {['Operator', 'RFLead', 'Embedded', 'Algo', 'Backend', 'Security'].map((role) => (
+                {[
+                  {
+                    role: 'Admin',
+                    description: 'Full system access, user management, configuration, and security settings',
+                    users: 2
+                  },
+                  {
+                    role: 'Nurse',
+                    description: 'Read-only access to patient list, live map, alerts, and overview dashboards',
+                    users: 12
+                  },
+                  {
+                    role: 'Backend',
+                    description: 'API performance monitoring, backend health status, database metrics, and API key management',
+                    users: 3
+                  }
+                ].map(({ role, description, users }) => (
                   <div
                     key={role}
                     className="flex items-center justify-between p-3 border border-border rounded-lg"
                   >
                     <div>
                       <div className="font-medium text-sm">{role}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {role === 'Operator' && 'Monitor system, acknowledge alerts, view maps'}
-                        {role === 'RFLead' && 'RF planning, anchor layout, accuracy analysis'}
-                        {role === 'Embedded' && 'Firmware management, OTA updates, battery monitoring'}
-                        {role === 'Algo' && 'Algorithm configuration, sensor fusion, accuracy tuning'}
-                        {role === 'Backend' && 'Pipeline health, database management, API monitoring'}
-                        {role === 'Security' && 'Full access, audit logs, compliance, threat management'}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{description}</div>
                     </div>
-                    <Badge variant="outline">
-                      {role === 'Operator' ? '12' : role === 'Security' ? '2' : Math.floor(Math.random() * 5) + 1} users
-                    </Badge>
+                    <Badge variant="outline">{users} users</Badge>
                   </div>
                 ))}
               </div>
@@ -162,7 +169,7 @@ export default function Admin() {
                 <p className="text-sm text-muted-foreground">
                   Manage API keys for external integrations
                 </p>
-                {hasRole('admin') && <Button size="sm">Generate New Key</Button>}
+                {hasAnyRole(['admin', 'backend']) && <Button size="sm">Generate New Key</Button>}
               </div>
 
               <div className="space-y-2">
