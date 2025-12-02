@@ -56,8 +56,8 @@ export default function Admin() {
       <Tabs defaultValue="floorplans" className="w-full">
         <TabsList>
           <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
-          <TabsTrigger value="rbac" disabled={!hasAnyRole(['admin', 'clinician'])}>
-            Roles & Access {!hasAnyRole(['admin', 'clinician']) && <Lock className="h-3 w-3 ml-1" />}
+          <TabsTrigger value="rbac" disabled={!hasRole('admin')}>
+            Roles & Access {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}
           </TabsTrigger>
           <TabsTrigger value="api" disabled={!hasRole('admin')}>
             API Keys {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}
