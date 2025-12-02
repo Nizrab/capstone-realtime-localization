@@ -393,7 +393,7 @@ export const mockAlerts: Alert[] = [
     createdAt: new Date(Date.now() - 60000).toISOString(),
     status: "open",
     entityId: "T-027",
-    detailed: { message: "Equipment moved outside typical movement pattern." },
+    details: { message: "Equipment moved outside typical movement pattern." },
   },
 ];
 
