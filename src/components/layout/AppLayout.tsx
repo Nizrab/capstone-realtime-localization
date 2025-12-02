@@ -23,13 +23,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
-  { path: '/', label: 'Overview', icon: LayoutDashboard, roles: ['admin', 'nurse'] as const },
-  { path: '/map', label: 'Live Map', icon: Map, roles: ['admin', 'nurse'] as const },
-  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin'] as const },
-  { path: '/alerts', label: 'Alerts', icon: Bell, roles: ['admin', 'nurse'] as const },
-  { path: '/playback', label: 'Playback', icon: PlayCircle, roles: ['admin'] as const },
+  { path: '/', label: 'Overview', icon: LayoutDashboard, roles: ['admin', 'nurse', 'backend'] as const },
+  { path: '/map', label: 'Live Map', icon: Map, roles: ['admin', 'nurse', 'backend'] as const },
+  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin', 'backend'] as const },
+  { path: '/alerts', label: 'Alerts', icon: Bell, roles: ['admin', 'nurse', 'backend'] as const },
+  { path: '/playback', label: 'Playback', icon: PlayCircle, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/dashboards', label: 'Dashboards', icon: BarChart3, roles: ['admin', 'nurse', 'backend'] as const },
-  { path: '/patients', label: 'Patients', icon: Activity, roles: ['admin', 'nurse'] as const },
+  { path: '/patients', label: 'Patients', icon: Activity, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/admin', label: 'Admin', icon: Settings, roles: ['admin', 'backend'] as const },
 ];
 
@@ -163,7 +163,7 @@ export default function AppLayout() {
 
           {/* User Info */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{user.username}</span>
+            <span className="text-sm text-muted-foreground">Role:</span>
             <Badge variant="outline" className="text-xs capitalize">
               {user.role}
             </Badge>
