@@ -163,7 +163,7 @@ export default function AppLayout() {
 
           {/* User Info */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Role:</span>
+            <span className="text-sm text-muted-foreground">{user.username}</span>
             <Badge variant="outline" className="text-xs capitalize">
               {user.role}
             </Badge>
