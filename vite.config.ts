@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/rtls-viz/",
+  base: "/capstone-realtime-localization/",
   server: {
     host: "::",
     port: 8080,
