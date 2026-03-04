@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +10,7 @@ import { Search, Download, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -24,12 +26,14 @@ interface NetworkDevice {
 export default function Inventory() {
   const { anchors, tags, setAnchors, setTags } = useRTLSStore();
   const { hasRole } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [anchorSearch, setAnchorSearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
   const [networkSearch, setNetworkSearch] = useState('');
   const [networkDevices, setNetworkDevices] = useState<NetworkDevice[]>([]);
   const [networkLoading, setNetworkLoading] = useState(false);
   const [networkError, setNetworkError] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     setAnchors(mockAnchors);
@@ -56,7 +60,24 @@ export default function Inventory() {
   }, []);
 
   // Poll network devices every 5s when admin views the tab
-  const [activeTab, setActiveTab] = useState('anchors');
+  const urlTab = searchParams.get('tab');
+  const urlHighlight = searchParams.get('highlight');
+  const [activeTab, setActiveTab] = useState(urlTab || 'anchors');
+
+  // Handle URL params for tab switching and highlighting
+  useEffect(() => {
+    if (urlTab) {
+      setActiveTab(urlTab);
+    }
+    if (urlHighlight) {
+      setHighlightId(urlHighlight);
+      // Clear highlight after 3 seconds
+      const timeout = setTimeout(() => setHighlightId(null), 3000);
+      // Clean URL params
+      setSearchParams({}, { replace: true });
+      return () => clearTimeout(timeout);
+    }
+  }, [urlTab, urlHighlight, setSearchParams]);
   useEffect(() => {
     if (activeTab !== 'network' || !hasRole('admin')) return;
     fetchNetworkDevices();
@@ -151,7 +172,12 @@ export default function Inventory() {
                     {filteredAnchors.map((anchor) => (
                       <tr
                         key={anchor.id}
-                        className="border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer"
+                        id={`row-${anchor.id}`}
+                        className={cn(
+                          "border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors duration-500",
+                          highlightId === anchor.id && "bg-primary/15 ring-1 ring-primary/30"
+                        )}
+                        ref={highlightId === anchor.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
                       >
                         <td className="py-3 font-mono text-xs">{anchor.id}</td>
                         <td className="py-3 font-medium">{anchor.label}</td>
@@ -210,7 +236,12 @@ export default function Inventory() {
                     {filteredTags.map((tag) => (
                       <tr
                         key={tag.id}
-                        className="border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer"
+                        id={`row-${tag.id}`}
+                        className={cn(
+                          "border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors duration-500",
+                          highlightId === tag.id && "bg-primary/15 ring-1 ring-primary/30"
+                        )}
+                        ref={highlightId === tag.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
                       >
                         <td className="py-3 font-mono text-xs">{tag.id}</td>
                         <td className="py-3 font-medium">{tag.label}</td>
