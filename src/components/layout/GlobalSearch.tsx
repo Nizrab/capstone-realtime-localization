@@ -188,15 +188,15 @@ export default function GlobalSearch() {
       </div>
 
       {open && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-2xl z-50 max-h-80 overflow-y-auto">
           {results.map((result, i) => {
             const Icon = result.icon;
             return (
               <button
                 key={result.id}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors',
-                  i === selectedIndex ? 'bg-muted text-foreground' : 'hover:bg-muted/50'
+                  'w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors border-b border-border/50 last:border-b-0',
+                  i === selectedIndex ? 'bg-primary/10 text-foreground' : 'text-foreground hover:bg-muted/60'
                 )}
                 onClick={() => handleSelect(result)}
                 onMouseEnter={() => setSelectedIndex(i)}
