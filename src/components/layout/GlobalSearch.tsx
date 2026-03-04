@@ -196,7 +196,7 @@ export default function GlobalSearch() {
                 key={result.id}
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors',
-                  i === selectedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-muted/50'
+                  i === selectedIndex ? 'bg-muted text-foreground' : 'hover:bg-muted/50'
                 )}
                 onClick={() => handleSelect(result)}
                 onMouseEnter={() => setSelectedIndex(i)}
