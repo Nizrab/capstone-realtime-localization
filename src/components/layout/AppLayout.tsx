@@ -134,33 +134,6 @@ export default function AppLayout() {
             </div>
           </div>
 
-          {/* Health Pills */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-mono">
-              <Activity className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Latency:</span>
-              <Badge 
-                variant="outline" 
-                className={cn(
-                  health.ingestToUiMs > 200 ? "severity-warning" : "status-online"
-                )}
-              >
-                {health.ingestToUiMs}ms
-              </Badge>
-            </div>
-            <div className="text-xs font-mono">
-              <span className="text-muted-foreground">Loss:</span>
-              <span className={cn("ml-1.5", health.packetLossPct > 1 ? "text-severity-warning" : "text-status-online")}>
-                {health.packetLossPct.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-
-          {/* Env Badge */}
-          <Badge variant="outline" className="font-mono text-xs">
-            PILOT
-          </Badge>
-
           {/* User Info */}
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs capitalize">
