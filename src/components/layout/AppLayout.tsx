@@ -22,7 +22,7 @@ import GlobalSearch from '@/components/layout/GlobalSearch';
 const navItems = [
   { path: '/', label: 'Overview', icon: LayoutDashboard, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/map', label: 'Live Map', icon: Map, roles: ['admin', 'nurse', 'backend'] as const },
-  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin', 'backend'] as const },
+  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/alerts', label: 'Alerts', icon: Bell, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/playback', label: 'Playback', icon: PlayCircle, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/dashboards', label: 'Dashboards', icon: BarChart3, roles: ['admin', 'nurse', 'backend'] as const },
