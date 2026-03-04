@@ -143,9 +143,6 @@ export default function Inventory() {
                       <th className="pb-3 font-medium text-muted-foreground">Label</th>
                       <th className="pb-3 font-medium text-muted-foreground">Technology</th>
                       <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Position</th>
-                      <th className="pb-3 font-medium text-muted-foreground">RSSI</th>
-                      <th className="pb-3 font-medium text-muted-foreground">SNR</th>
                       <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
                       <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
                     </tr>
@@ -165,15 +162,6 @@ export default function Inventory() {
                         </td>
                         <td className="py-3">
                           <StatusBadge status={anchor.status} />
-                        </td>
-                        <td className="py-3 font-mono text-xs">
-                          {anchor.position.x.toFixed(1)}, {anchor.position.y.toFixed(1)}
-                        </td>
-                        <td className="py-3 font-mono text-xs">
-                          {anchor.rssi ? `${anchor.rssi} dBm` : '—'}
-                        </td>
-                        <td className="py-3 font-mono text-xs">
-                          {anchor.snr ? `${anchor.snr} dB` : '—'}
                         </td>
                         <td className="py-3 font-mono text-xs">{anchor.firmware}</td>
                         <td className="py-3 text-xs text-muted-foreground">
@@ -214,8 +202,6 @@ export default function Inventory() {
                       <th className="pb-3 font-medium text-muted-foreground">Label</th>
                       <th className="pb-3 font-medium text-muted-foreground">Technology</th>
                       <th className="pb-3 font-medium text-muted-foreground">Battery</th>
-                      <th className="pb-3 font-medium text-muted-foreground">HR</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Temp</th>
                       <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
                       <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
                     </tr>
@@ -247,12 +233,6 @@ export default function Inventory() {
                             />
                             <span className="font-mono text-xs">{tag.batteryPct}%</span>
                           </div>
-                        </td>
-                        <td className="py-3 font-mono text-xs">
-                          {tag.sensors.hr ? `${tag.sensors.hr} bpm` : '—'}
-                        </td>
-                        <td className="py-3 font-mono text-xs">
-                          {tag.sensors.tempC ? `${tag.sensors.tempC}°C` : '—'}
                         </td>
                         <td className="py-3 font-mono text-xs">{tag.firmware}</td>
                         <td className="py-3 text-xs text-muted-foreground">
