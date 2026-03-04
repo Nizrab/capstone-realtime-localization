@@ -8,19 +8,17 @@ import {
   PlayCircle, 
   BarChart3, 
   Settings,
-  Search,
   Activity,
   MapPin,
-  LogOut,
-  User
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRTLSStore } from '@/store/useRTLSStore';
 import { useLogin } from '@/contexts/LoginContext';
 import { useAuth, RequireRole } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import GlobalSearch from '@/components/layout/GlobalSearch';
 
 const navItems = [
   { path: '/', label: 'Overview', icon: LayoutDashboard, roles: ['admin', 'nurse', 'backend'] as const },
@@ -39,7 +37,7 @@ export default function AppLayout() {
   const { health, alerts } = useRTLSStore();
   const { user, logout } = useLogin();
   const { roles, hasRole } = useAuth();
-  const [searchOpen, setSearchOpen] = useState(false);
+  
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -123,16 +121,7 @@ export default function AppLayout() {
         {/* Top Bar */}
         <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4">
           {/* Search */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search assets, patients, tags, anchors... (⌘K)"
-                className="pl-8 bg-background"
-                onFocus={() => setSearchOpen(true)}
-              />
-            </div>
-          </div>
+          <GlobalSearch />
 
           {/* User Info */}
           <div className="flex items-center gap-2">
