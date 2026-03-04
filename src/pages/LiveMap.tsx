@@ -149,8 +149,8 @@ export default function LiveMap() {
           className="h-full w-full bg-background"
           crs={L.CRS.Simple}
           minZoom={0}
-          maxZoom={3}
-          zoomControl={false}
+          maxZoom={5}
+          zoomControl={true}
         >
           <MapController />
 
