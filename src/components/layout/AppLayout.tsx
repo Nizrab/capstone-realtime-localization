@@ -8,7 +8,6 @@ import {
   PlayCircle, 
   BarChart3, 
   Settings,
-  Activity,
   MapPin,
   LogOut
 } from 'lucide-react';
@@ -27,7 +26,7 @@ const navItems = [
   { path: '/alerts', label: 'Alerts', icon: Bell, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/playback', label: 'Playback', icon: PlayCircle, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/dashboards', label: 'Dashboards', icon: BarChart3, roles: ['admin', 'nurse', 'backend'] as const },
-  { path: '/patients', label: 'Patients', icon: Activity, roles: ['admin', 'nurse', 'backend'] as const },
+  
   { path: '/admin', label: 'Admin', icon: Settings, roles: ['admin', 'backend'] as const },
 ];
 

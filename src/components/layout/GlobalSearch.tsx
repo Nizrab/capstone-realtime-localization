@@ -23,7 +23,7 @@ const pages: SearchResult[] = [
   { id: 'page-alerts', label: 'Alerts', type: 'page', description: 'View and manage alerts', path: '/alerts', icon: Bell },
   { id: 'page-playback', label: 'Playback', type: 'page', description: 'Replay historical tracks', path: '/playback', icon: PlayCircle },
   { id: 'page-dashboards', label: 'Dashboards', type: 'page', description: 'Analytics dashboards', path: '/dashboards', icon: BarChart3 },
-  { id: 'page-patients', label: 'Patients', type: 'page', description: 'Patient management', path: '/patients', icon: Activity },
+  
   { id: 'page-admin', label: 'Admin', type: 'page', description: 'System administration', path: '/admin', icon: Settings },
 ];
 

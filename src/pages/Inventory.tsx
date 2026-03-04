@@ -107,6 +107,38 @@ export default function Inventory() {
 
   const isAdmin = hasRole('admin');
 
+  const handleExportCSV = () => {
+    let csvContent = '';
+    let filename = '';
+
+    if (activeTab === 'anchors') {
+      csvContent = 'ID,Label,Technology,Status,Firmware,Last Seen\n';
+      anchors.forEach((a) => {
+        csvContent += `${a.id},${a.label},${a.tech},${a.status},${a.firmware},${new Date(a.lastSeen).toLocaleString()}\n`;
+      });
+      filename = 'anchors.csv';
+    } else if (activeTab === 'tags') {
+      csvContent = 'ID,Label,Technology,Battery %,Firmware,Last Seen\n';
+      tags.forEach((t) => {
+        csvContent += `${t.id},${t.label},${t.tech},${t.batteryPct},${t.firmware},${new Date(t.lastSeen).toLocaleString()}\n`;
+      });
+      filename = 'tags.csv';
+    } else if (activeTab === 'network') {
+      csvContent = 'ID,Label,IP Address,MAC Address,Status,Last Seen\n';
+      networkDevices.forEach((d) => {
+        csvContent += `${d.id},${d.label},${d.ip},${d.mac},${d.status},${new Date(d.lastSeen).toLocaleString()}\n`;
+      });
+      filename = 'network_devices.csv';
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -116,7 +148,7 @@ export default function Inventory() {
             Manage and monitor all anchors, tags, and devices
           </p>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleExportCSV}>
           <Download className="h-4 w-4 mr-2" />
           Export CSV
         </Button>
