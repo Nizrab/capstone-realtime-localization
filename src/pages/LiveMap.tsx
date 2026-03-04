@@ -11,10 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Layers } from 'lucide-react';
 import type { Tag } from '@/types/rtls';
 
-// ─── S3 DATA SOURCE ─────────────────────────────────────────────
-// Replace with your actual S3 bucket URL
-const S3_POSITIONS_URL =
-  'https://YOUR_BUCKET.s3.amazonaws.com/live/positions.json';
+// ─── API DATA SOURCE ────────────────────────────────────────────
+// Set VITE_API_BASE_URL in your environment (e.g. GitHub Actions secrets)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const POSITIONS_ENDPOINT = `${API_BASE_URL}/ingest`;
 
 const POLL_INTERVAL_MS = 2500; // fetch every 2.5 seconds
 
@@ -97,7 +97,7 @@ export default function LiveMap() {
 
     const fetchPositions = async () => {
       try {
-        const res = await fetch(S3_POSITIONS_URL, { cache: 'no-store' });
+        const res = await fetch(POSITIONS_ENDPOINT, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: S3Payload = await res.json();
 
