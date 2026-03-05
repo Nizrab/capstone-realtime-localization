@@ -159,9 +159,11 @@ const makeFloorSvg = (floor: FloorConfig) => {
 };
 
 // ─── Map controller ─────────────────────────────────────────────
-function MapController({ center }: { center: [number, number] }) {
+function MapController({ bounds }: { bounds: L.LatLngBounds }) {
   const map = useMap();
-  useEffect(() => { map.setView(center, 1); }, [map, center]);
+  useEffect(() => {
+    map.fitBounds(bounds, { padding: [20, 20], animate: true });
+  }, [map, bounds]);
   return null;
 }
 
@@ -277,7 +279,7 @@ export default function LiveMap() {
           maxZoom={5}
           zoomControl={true}
         >
-          <MapController center={mapCenter} />
+          <MapController bounds={activeBounds} />
 
           {/* Render each enabled floor stacked vertically */}
           {FLOORS.filter((f) => enabledFloors.has(f.id)).map((floor) => {
