@@ -111,20 +111,50 @@ const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) =>
   });
 };
 
-// ─── Floor SVG generator ────────────────────────────────────────
-// Floor image URLs – use uploaded floorplan images when available, otherwise generate SVG
-const FLOOR_IMAGES: Record<string, string> = {
-  'ap-1': '/floorplans/ap-floor1.png',
-  'ap-2': '/floorplans/ap-floor2.png',
-  'ap-3': '/floorplans/ap-floor3.png',
-  'ap-4': '/floorplans/ap-floor4.png',
+// ─── Floor SVG generators ────────────────────────────────────────
+const svgRoom = (x: number, y: number, w: number, h: number, label: string) =>
+  `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#94a3b8" stroke-width="2"/>${label ? `<text x="${x + w / 2}" y="${y + h / 2 + 5}" fill="#64748b" font-size="13" font-family="monospace" text-anchor="middle">${label}</text>` : ''}`;
+
+const FLOOR_SVG_BUILDERS: Record<string, (w: number, h: number) => string> = {
+  'ap-1': (w, h) => [
+    svgRoom(20, 20, w * 0.6, h * 0.28, 'Stairwell A'),
+    svgRoom(20, h * 0.28 + 20, w * 0.65, h * 0.12, ''),
+    svgRoom(20, h * 0.42, w * 0.65, h * 0.56, 'Lab'),
+    svgRoom(w * 0.7, 20, w * 0.28, h * 0.96, 'Lecture Room'),
+  ].join(''),
+  'ap-2': (w, h) => [
+    svgRoom(20, 20, w * 0.5, h * 0.25, 'Stairwell A'),
+    svgRoom(w * 0.5 + 20, 20, w * 0.18, h * 0.25, 'Entrance'),
+    svgRoom(w * 0.72, 20, w * 0.26, h * 0.2, 'Reception'),
+    svgRoom(60, h * 0.3, w * 0.15, h * 0.22, 'Storage'),
+    svgRoom(60 + w * 0.16, h * 0.3, w * 0.16, h * 0.22, 'Washroom'),
+    svgRoom(60 + w * 0.33, h * 0.3, w * 0.16, h * 0.22, 'Stairwell B'),
+    svgRoom(w * 0.72, h * 0.22, w * 0.26, h * 0.28, 'Staff Offices'),
+    svgRoom(20, h * 0.56, w * 0.65, h * 0.42, 'Labs'),
+    svgRoom(w * 0.72, h * 0.52, w * 0.26, h * 0.46, 'Staff Rooms'),
+  ].join(''),
+  'ap-3': (w, h) => [
+    svgRoom(20, 20, w * 0.6, h * 0.25, 'Stairwell A'),
+    svgRoom(w * 0.65, 20, w * 0.33, h * 0.3, 'Labs'),
+    svgRoom(60, h * 0.28, w * 0.15, h * 0.22, 'Storage'),
+    svgRoom(60 + w * 0.16, h * 0.28, w * 0.16, h * 0.22, 'Washroom'),
+    svgRoom(60 + w * 0.33, h * 0.28, w * 0.16, h * 0.22, 'Stairwell B'),
+    svgRoom(20, h * 0.54, w * 0.62, h * 0.44, 'Labs'),
+    svgRoom(w * 0.65, h * 0.34, w * 0.33, h * 0.64, 'Labs'),
+  ].join(''),
+  'ap-4': (w, h) => [
+    svgRoom(20, 20, w * 0.62, h * 0.35, 'Stairwell A'),
+    svgRoom(w * 0.35, h * 0.38, w * 0.28, h * 0.32, 'Stairwell B'),
+    svgRoom(w * 0.68, 20, w * 0.3, h * 0.96, 'Lab'),
+    svgRoom(20, h * 0.38, w * 0.62, h * 0.6, ''),
+  ].join(''),
 };
 
 const makeFloorSvg = (floor: FloorConfig) => {
-  if (FLOOR_IMAGES[floor.id]) return FLOOR_IMAGES[floor.id];
   const w = floor.widthMeters * 20;
   const h = floor.heightMeters * 20;
-  return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#1e293b"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="2" fill="none"/><g stroke="#334155" stroke-width="1" opacity="0.3"><line x1="${w / 4}" y1="0" x2="${w / 4}" y2="${h}"/><line x1="${w / 2}" y1="0" x2="${w / 2}" y2="${h}"/><line x1="${w * 3 / 4}" y1="0" x2="${w * 3 / 4}" y2="${h}"/><line x1="0" y1="${h / 3}" x2="${w}" y2="${h / 3}"/><line x1="0" y1="${h * 2 / 3}" x2="${w}" y2="${h * 2 / 3}"/></g><text x="20" y="30" fill="#64748b" font-size="14" font-family="monospace">${BUILDING.building} – ${floor.label} (${floor.widthMeters}m × ${floor.heightMeters}m)</text></svg>`)}`;
+  const rooms = FLOOR_SVG_BUILDERS[floor.id]?.(w, h) ?? '';
+  return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none"/>${rooms}</svg>`)}`;
 };
 
 // ─── Map controller ─────────────────────────────────────────────
