@@ -46,19 +46,18 @@ interface MapDevice {
 const now = new Date().toISOString();
 
 const STATIC_DEVICES: MapDevice[] = [
-  // ── Floor 1 Anchors ──
-  { id: 'ANC-101', label: 'AP1-UWB-01', type: 'anchor', floorId: 'ap-1', room: 'AP 101', position: { x: 5, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-102', label: 'AP1-UWB-02', type: 'anchor', floorId: 'ap-1', room: 'AP 103', position: { x: 20, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-103', label: 'AP1-BLE-01', type: 'anchor', floorId: 'ap-1', room: 'AP 105', position: { x: 35, y: 5 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-104', label: 'AP1-UWB-03', type: 'anchor', floorId: 'ap-1', room: 'AP 110', position: { x: 50, y: 15 }, status: 'degraded', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-105', label: 'AP1-BLE-02', type: 'anchor', floorId: 'ap-1', room: 'AP 112', position: { x: 10, y: 25 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-106', label: 'AP1-UWB-04', type: 'anchor', floorId: 'ap-1', room: 'AP 115', position: { x: 45, y: 25 }, status: 'online', tech: 'UWB', lastSeen: now },
+  // ── Floor 1 Anchors (mapped to floorplan rooms) ──
+  { id: 'ANC-101', label: 'AP1-UWB-01', type: 'anchor', floorId: 'ap-1', room: 'Stairwell A', position: { x: 25, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-102', label: 'AP1-UWB-02', type: 'anchor', floorId: 'ap-1', room: 'Lecture Room', position: { x: 55, y: 8 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-103', label: 'AP1-BLE-01', type: 'anchor', floorId: 'ap-1', room: 'Lab', position: { x: 15, y: 22 }, status: 'online', tech: 'BLE', lastSeen: now },
+  { id: 'ANC-104', label: 'AP1-UWB-03', type: 'anchor', floorId: 'ap-1', room: 'Lab', position: { x: 40, y: 22 }, status: 'degraded', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-105', label: 'AP1-BLE-02', type: 'anchor', floorId: 'ap-1', room: 'Lecture Room', position: { x: 55, y: 20 }, status: 'online', tech: 'BLE', lastSeen: now },
   // ── Floor 1 Rogues ──
-  { id: 'ROG-101', label: 'Rogue-AP1', type: 'rogue', floorId: 'ap-1', room: 'AP 102', position: { x: 12, y: 10 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  { id: 'ROG-102', label: 'Rogue-AP2', type: 'rogue', floorId: 'ap-1', room: 'AP 108', position: { x: 40, y: 20 }, status: 'online', tech: 'WIFI', lastSeen: now },
+  { id: 'ROG-101', label: 'Rogue-AP1', type: 'rogue', floorId: 'ap-1', room: 'Stairwell A', position: { x: 30, y: 8 }, status: 'online', tech: 'WIFI', lastSeen: now },
+  { id: 'ROG-102', label: 'Rogue-AP2', type: 'rogue', floorId: 'ap-1', room: 'Lab', position: { x: 25, y: 18 }, status: 'online', tech: 'WIFI', lastSeen: now },
   // ── Floor 1 Tags ──
-  { id: 'TAG-101', label: 'Tag-Student-A', type: 'tag', floorId: 'ap-1', room: 'AP 101', position: { x: 8, y: 7 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'TAG-102', label: 'Tag-Equipment-1', type: 'tag', floorId: 'ap-1', room: 'AP 105', position: { x: 33, y: 8 }, status: 'online', tech: 'BLE', lastSeen: now },
+  { id: 'TAG-101', label: 'Tag-Student-A', type: 'tag', floorId: 'ap-1', room: 'Lab', position: { x: 28, y: 24 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'TAG-102', label: 'Tag-Equipment-1', type: 'tag', floorId: 'ap-1', room: 'Lecture Room', position: { x: 54, y: 15 }, status: 'online', tech: 'BLE', lastSeen: now },
 
   // ── Floor 2 Anchors (mapped to floorplan rooms) ──
   { id: 'ANC-201', label: 'AP2-UWB-01', type: 'anchor', floorId: 'ap-2', room: 'Stairwell A', position: { x: 15, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
@@ -115,6 +114,7 @@ const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) =>
 // ─── Floor SVG generator ────────────────────────────────────────
 // Floor image URLs – use uploaded floorplan images when available, otherwise generate SVG
 const FLOOR_IMAGES: Record<string, string> = {
+  'ap-1': '/floorplans/ap-floor1.png',
   'ap-2': '/floorplans/ap-floor2.png',
   'ap-3': '/floorplans/ap-floor3.png',
 };
