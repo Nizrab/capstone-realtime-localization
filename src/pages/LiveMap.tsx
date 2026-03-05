@@ -73,14 +73,15 @@ const STATIC_DEVICES: MapDevice[] = [
   { id: 'TAG-201', label: 'Tag-Laptop-B', type: 'tag', floorId: 'ap-2', room: 'Labs', position: { x: 22, y: 22 }, status: 'online', tech: 'UWB', lastSeen: now },
   { id: 'TAG-202', label: 'Tag-Projector-1', type: 'tag', floorId: 'ap-2', room: 'Staff Rooms', position: { x: 52, y: 23 }, status: 'degraded', tech: 'BLE', lastSeen: now },
 
-  // ── Floor 3 Anchors ──
-  { id: 'ANC-301', label: 'AP3-UWB-01', type: 'anchor', floorId: 'ap-3', room: 'AP 301', position: { x: 10, y: 8 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-302', label: 'AP3-BLE-01', type: 'anchor', floorId: 'ap-3', room: 'AP 305', position: { x: 30, y: 8 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-303', label: 'AP3-UWB-02', type: 'anchor', floorId: 'ap-3', room: 'AP 310', position: { x: 50, y: 20 }, status: 'online', tech: 'UWB', lastSeen: now },
+  // ── Floor 3 Anchors (mapped to floorplan rooms) ──
+  { id: 'ANC-301', label: 'AP3-UWB-01', type: 'anchor', floorId: 'ap-3', room: 'Stairwell A', position: { x: 2, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-302', label: 'AP3-BLE-01', type: 'anchor', floorId: 'ap-3', room: 'Labs (Top Right)', position: { x: 52, y: 5 }, status: 'online', tech: 'BLE', lastSeen: now },
+  { id: 'ANC-303', label: 'AP3-UWB-02', type: 'anchor', floorId: 'ap-3', room: 'Labs (Bottom)', position: { x: 25, y: 24 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-304', label: 'AP3-BLE-02', type: 'anchor', floorId: 'ap-3', room: 'Labs (Bottom Right)', position: { x: 52, y: 22 }, status: 'online', tech: 'BLE', lastSeen: now },
   // ── Floor 3 Rogues ──
-  { id: 'ROG-301', label: 'Rogue-AP4', type: 'rogue', floorId: 'ap-3', room: 'AP 307', position: { x: 38, y: 15 }, status: 'online', tech: 'WIFI', lastSeen: now },
+  { id: 'ROG-301', label: 'Rogue-AP4', type: 'rogue', floorId: 'ap-3', room: 'Washroom', position: { x: 28, y: 13 }, status: 'online', tech: 'WIFI', lastSeen: now },
   // ── Floor 3 Tags ──
-  { id: 'TAG-301', label: 'Tag-Faculty-C', type: 'tag', floorId: 'ap-3', room: 'AP 305', position: { x: 28, y: 10 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'TAG-301', label: 'Tag-Faculty-C', type: 'tag', floorId: 'ap-3', room: 'Stairwell B', position: { x: 38, y: 13 }, status: 'online', tech: 'UWB', lastSeen: now },
 
   // ── Floor 4 Anchors ──
   { id: 'ANC-401', label: 'AP4-UWB-01', type: 'anchor', floorId: 'ap-4', room: 'AP 401', position: { x: 8, y: 6 }, status: 'online', tech: 'UWB', lastSeen: now },
@@ -115,6 +116,7 @@ const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) =>
 // Floor image URLs – use uploaded floorplan images when available, otherwise generate SVG
 const FLOOR_IMAGES: Record<string, string> = {
   'ap-2': '/floorplans/ap-floor2.png',
+  'ap-3': '/floorplans/ap-floor3.png',
 };
 
 const makeFloorSvg = (floor: FloorConfig) => {
