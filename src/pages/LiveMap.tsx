@@ -60,16 +60,18 @@ const STATIC_DEVICES: MapDevice[] = [
   { id: 'TAG-101', label: 'Tag-Student-A', type: 'tag', floorId: 'ap-1', room: 'AP 101', position: { x: 8, y: 7 }, status: 'online', tech: 'UWB', lastSeen: now },
   { id: 'TAG-102', label: 'Tag-Equipment-1', type: 'tag', floorId: 'ap-1', room: 'AP 105', position: { x: 33, y: 8 }, status: 'online', tech: 'BLE', lastSeen: now },
 
-  // ── Floor 2 Anchors ──
-  { id: 'ANC-201', label: 'AP2-UWB-01', type: 'anchor', floorId: 'ap-2', room: 'AP 201', position: { x: 5, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-202', label: 'AP2-UWB-02', type: 'anchor', floorId: 'ap-2', room: 'AP 205', position: { x: 30, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-203', label: 'AP2-BLE-01', type: 'anchor', floorId: 'ap-2', room: 'AP 210', position: { x: 55, y: 15 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-204', label: 'AP2-UWB-03', type: 'anchor', floorId: 'ap-2', room: 'AP 215', position: { x: 15, y: 25 }, status: 'offline', tech: 'UWB', lastSeen: now },
+  // ── Floor 2 Anchors (mapped to floorplan rooms) ──
+  { id: 'ANC-201', label: 'AP2-UWB-01', type: 'anchor', floorId: 'ap-2', room: 'Stairwell A', position: { x: 15, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-202', label: 'AP2-UWB-02', type: 'anchor', floorId: 'ap-2', room: 'Entrance', position: { x: 42, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-203', label: 'AP2-BLE-01', type: 'anchor', floorId: 'ap-2', room: 'Reception', position: { x: 55, y: 8 }, status: 'online', tech: 'BLE', lastSeen: now },
+  { id: 'ANC-204', label: 'AP2-UWB-03', type: 'anchor', floorId: 'ap-2', room: 'Labs', position: { x: 18, y: 24 }, status: 'offline', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-205', label: 'AP2-BLE-02', type: 'anchor', floorId: 'ap-2', room: 'Staff Offices', position: { x: 56, y: 16 }, status: 'online', tech: 'BLE', lastSeen: now },
   // ── Floor 2 Rogues ──
-  { id: 'ROG-201', label: 'Rogue-AP3', type: 'rogue', floorId: 'ap-2', room: 'AP 203', position: { x: 25, y: 12 }, status: 'online', tech: 'WIFI', lastSeen: now },
+  { id: 'ROG-201', label: 'Rogue-AP3', type: 'rogue', floorId: 'ap-2', room: 'Washroom', position: { x: 25, y: 14 }, status: 'online', tech: 'WIFI', lastSeen: now },
+  { id: 'ROG-202', label: 'Rogue-AP5', type: 'rogue', floorId: 'ap-2', room: 'Storage', position: { x: 12, y: 14 }, status: 'online', tech: 'WIFI', lastSeen: now },
   // ── Floor 2 Tags ──
-  { id: 'TAG-201', label: 'Tag-Laptop-B', type: 'tag', floorId: 'ap-2', room: 'AP 201', position: { x: 7, y: 7 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'TAG-202', label: 'Tag-Projector-1', type: 'tag', floorId: 'ap-2', room: 'AP 210', position: { x: 52, y: 13 }, status: 'degraded', tech: 'BLE', lastSeen: now },
+  { id: 'TAG-201', label: 'Tag-Laptop-B', type: 'tag', floorId: 'ap-2', room: 'Labs', position: { x: 22, y: 22 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'TAG-202', label: 'Tag-Projector-1', type: 'tag', floorId: 'ap-2', room: 'Staff Rooms', position: { x: 52, y: 23 }, status: 'degraded', tech: 'BLE', lastSeen: now },
 
   // ── Floor 3 Anchors ──
   { id: 'ANC-301', label: 'AP3-UWB-01', type: 'anchor', floorId: 'ap-3', room: 'AP 301', position: { x: 10, y: 8 }, status: 'online', tech: 'UWB', lastSeen: now },
@@ -110,7 +112,13 @@ const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) =>
 };
 
 // ─── Floor SVG generator ────────────────────────────────────────
+// Floor image URLs – use uploaded floorplan images when available, otherwise generate SVG
+const FLOOR_IMAGES: Record<string, string> = {
+  'ap-2': '/floorplans/ap-floor2.png',
+};
+
 const makeFloorSvg = (floor: FloorConfig) => {
+  if (FLOOR_IMAGES[floor.id]) return FLOOR_IMAGES[floor.id];
   const w = floor.widthMeters * 20;
   const h = floor.heightMeters * 20;
   return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#1e293b"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="2" fill="none"/><g stroke="#334155" stroke-width="1" opacity="0.3"><line x1="${w / 4}" y1="0" x2="${w / 4}" y2="${h}"/><line x1="${w / 2}" y1="0" x2="${w / 2}" y2="${h}"/><line x1="${w * 3 / 4}" y1="0" x2="${w * 3 / 4}" y2="${h}"/><line x1="0" y1="${h / 3}" x2="${w}" y2="${h / 3}"/><line x1="0" y1="${h * 2 / 3}" x2="${w}" y2="${h * 2 / 3}"/></g><text x="20" y="30" fill="#64748b" font-size="14" font-family="monospace">${BUILDING.building} – ${floor.label} (${floor.widthMeters}m × ${floor.heightMeters}m)</text></svg>`)}`;
