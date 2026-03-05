@@ -82,12 +82,12 @@ const STATIC_DEVICES: MapDevice[] = [
   // ── Floor 3 Tags ──
   { id: 'TAG-301', label: 'Tag-Faculty-C', type: 'tag', floorId: 'ap-3', room: 'Stairwell B', position: { x: 38, y: 13 }, status: 'online', tech: 'UWB', lastSeen: now },
 
-  // ── Floor 4 Anchors ──
-  { id: 'ANC-401', label: 'AP4-UWB-01', type: 'anchor', floorId: 'ap-4', room: 'AP 401', position: { x: 8, y: 6 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-402', label: 'AP4-UWB-02', type: 'anchor', floorId: 'ap-4', room: 'AP 405', position: { x: 35, y: 6 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-403', label: 'AP4-BLE-01', type: 'anchor', floorId: 'ap-4', room: 'AP 415', position: { x: 50, y: 22 }, status: 'degraded', tech: 'BLE', lastSeen: now },
+  // ── Floor 4 Anchors (mapped to floorplan rooms) ──
+  { id: 'ANC-401', label: 'AP4-UWB-01', type: 'anchor', floorId: 'ap-4', room: 'Stairwell A', position: { x: 20, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-402', label: 'AP4-UWB-02', type: 'anchor', floorId: 'ap-4', room: 'Stairwell B', position: { x: 38, y: 12 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'ANC-403', label: 'AP4-BLE-01', type: 'anchor', floorId: 'ap-4', room: 'Lab', position: { x: 55, y: 12 }, status: 'degraded', tech: 'BLE', lastSeen: now },
   // ── Floor 4 Tags ──
-  { id: 'TAG-401', label: 'Tag-Server-Rack', type: 'tag', floorId: 'ap-4', room: 'AP 401', position: { x: 10, y: 8 }, status: 'online', tech: 'UWB', lastSeen: now },
+  { id: 'TAG-401', label: 'Tag-Server-Rack', type: 'tag', floorId: 'ap-4', room: 'Stairwell A', position: { x: 15, y: 7 }, status: 'online', tech: 'UWB', lastSeen: now },
 ];
 
 // ─── Icons ──────────────────────────────────────────────────────
@@ -117,6 +117,7 @@ const FLOOR_IMAGES: Record<string, string> = {
   'ap-1': '/floorplans/ap-floor1.png',
   'ap-2': '/floorplans/ap-floor2.png',
   'ap-3': '/floorplans/ap-floor3.png',
+  'ap-4': '/floorplans/ap-floor4.png',
 };
 
 const makeFloorSvg = (floor: FloorConfig) => {
