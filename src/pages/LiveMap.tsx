@@ -55,7 +55,7 @@ const STATIC_DEVICES: MapDevice[] = [
   // ── Floor 1 Rogues ──
   { id: 'ROG-101', label: 'Rogue-AP1', type: 'rogue', floorId: 'ap-1', room: 'Stairwell A', position: { x: 30, y: 8 }, status: 'online', tech: 'WIFI', lastSeen: now },
   { id: 'ROG-102', label: 'Rogue-AP2', type: 'rogue', floorId: 'ap-1', room: 'Lab', position: { x: 25, y: 18 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  { id: 'ROG-103', label: 'Apple', type: 'rogue', floorId: 'ap-2', room: 'Reception', position: { x: 55, y: 8 }, status: 'online', tech: 'WIFI', lastSeen: now },
+  { id: 'ROG-103', label: 'Apple', type: 'rogue', floorId: 'ap-2', room: 'Reception', position: { x: 55, y: 26 }, status: 'online', tech: 'WIFI', lastSeen: now },
   // ── Floor 1 Tags ──
   { id: 'TAG-101', label: 'Tag-Student-A', type: 'tag', floorId: 'ap-1', room: 'Lab', position: { x: 28, y: 24 }, status: 'online', tech: 'UWB', lastSeen: now },
   { id: 'TAG-102', label: 'Tag-Equipment-1', type: 'tag', floorId: 'ap-1', room: 'Lecture Room', position: { x: 54, y: 15 }, status: 'online', tech: 'BLE', lastSeen: now },
