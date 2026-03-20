@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Upload, FileText, X } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 export default function Playback() {
@@ -14,6 +14,13 @@ export default function Playback() {
   const [startTime, setStartTime] = useState('11:00');
   const [endDate, setEndDate] = useState('2025-09-01');
   const [endTime, setEndTime] = useState('13:00');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setUploadedFile(file);
+  };
 
   const totalDuration = 120; // 2 hours in minutes
 

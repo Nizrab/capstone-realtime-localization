@@ -112,50 +112,11 @@ const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) =>
   });
 };
 
-// ─── Floor SVG generators ────────────────────────────────────────
-const svgRoom = (x: number, y: number, w: number, h: number, label: string) =>
-  `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#94a3b8" stroke-width="2"/>${label ? `<text x="${x + w / 2}" y="${y + h / 2 + 5}" fill="#64748b" font-size="13" font-family="monospace" text-anchor="middle">${label}</text>` : ''}`;
-
-const FLOOR_SVG_BUILDERS: Record<string, (w: number, h: number) => string> = {
-  'ap-1': (w, h) => [
-    svgRoom(20, 20, w * 0.6, h * 0.28, 'Stairwell A'),
-    svgRoom(20, h * 0.28 + 20, w * 0.65, h * 0.12, ''),
-    svgRoom(20, h * 0.42, w * 0.65, h * 0.56, 'Lab'),
-    svgRoom(w * 0.7, 20, w * 0.28, h * 0.96, 'Lecture Room'),
-  ].join(''),
-  'ap-2': (w, h) => [
-    svgRoom(20, 20, w * 0.5, h * 0.25, 'Stairwell A'),
-    svgRoom(w * 0.5 + 20, 20, w * 0.18, h * 0.25, 'Entrance'),
-    svgRoom(w * 0.72, 20, w * 0.26, h * 0.2, 'Reception'),
-    svgRoom(60, h * 0.3, w * 0.15, h * 0.22, 'Storage'),
-    svgRoom(60 + w * 0.16, h * 0.3, w * 0.16, h * 0.22, 'Washroom'),
-    svgRoom(60 + w * 0.33, h * 0.3, w * 0.16, h * 0.22, 'Stairwell B'),
-    svgRoom(w * 0.72, h * 0.22, w * 0.26, h * 0.28, 'Staff Offices'),
-    svgRoom(20, h * 0.56, w * 0.65, h * 0.42, 'Labs'),
-    svgRoom(w * 0.72, h * 0.52, w * 0.26, h * 0.46, 'Staff Rooms'),
-  ].join(''),
-  'ap-3': (w, h) => [
-    svgRoom(20, 20, w * 0.6, h * 0.25, 'Stairwell A'),
-    svgRoom(w * 0.65, 20, w * 0.33, h * 0.3, 'Labs'),
-    svgRoom(60, h * 0.28, w * 0.15, h * 0.22, 'Storage'),
-    svgRoom(60 + w * 0.16, h * 0.28, w * 0.16, h * 0.22, 'Washroom'),
-    svgRoom(60 + w * 0.33, h * 0.28, w * 0.16, h * 0.22, 'Stairwell B'),
-    svgRoom(20, h * 0.54, w * 0.62, h * 0.44, 'Labs'),
-    svgRoom(w * 0.65, h * 0.34, w * 0.33, h * 0.64, 'Labs'),
-  ].join(''),
-  'ap-4': (w, h) => [
-    svgRoom(20, 20, w * 0.62, h * 0.35, 'Stairwell A'),
-    svgRoom(w * 0.35, h * 0.38, w * 0.28, h * 0.32, 'Stairwell B'),
-    svgRoom(w * 0.68, 20, w * 0.3, h * 0.96, 'Lab'),
-    svgRoom(20, h * 0.38, w * 0.62, h * 0.6, ''),
-  ].join(''),
-};
-
+// ─── Floor SVG generators (placeholder until AWS API connected) ──
 const makeFloorSvg = (floor: FloorConfig) => {
   const w = floor.widthMeters * 20;
   const h = floor.heightMeters * 20;
-  const rooms = FLOOR_SVG_BUILDERS[floor.id]?.(w, h) ?? '';
-  return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none"/>${rooms}</svg>`)}`;
+  return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none" stroke-dasharray="8 4"/><text x="${w/2}" y="${h/2 - 10}" fill="#94a3b8" font-size="16" font-family="sans-serif" text-anchor="middle">Awaiting AWS API</text><text x="${w/2}" y="${h/2 + 14}" fill="#cbd5e1" font-size="12" font-family="sans-serif" text-anchor="middle">${floor.label}</text></svg>`)}`;
 };
 
 // ─── Map controller ─────────────────────────────────────────────
