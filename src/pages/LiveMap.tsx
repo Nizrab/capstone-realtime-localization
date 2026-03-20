@@ -81,7 +81,7 @@ function MapController({ bounds }: { bounds: L.LatLngBounds }) {
 
 // ─── Main component ─────────────────────────────────────────────
 export default function LiveMap() {
-  const [enabledFloors, setEnabledFloors] = useState<Set<string>>(new Set(['ap-1']));
+  const [enabledFloors, setEnabledFloors] = useState<Set<string>>(new Set());
   const [showAnchors, setShowAnchors] = useState(true);
   const [showRogues, setShowRogues] = useState(true);
   const [showTags, setShowTags] = useState(true);
