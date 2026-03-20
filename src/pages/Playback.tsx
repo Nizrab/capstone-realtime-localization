@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Upload, FileText, X } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 export default function Playback() {
@@ -14,6 +14,13 @@ export default function Playback() {
   const [startTime, setStartTime] = useState('11:00');
   const [endDate, setEndDate] = useState('2025-09-01');
   const [endTime, setEndTime] = useState('13:00');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setUploadedFile(file);
+  };
 
   const totalDuration = 120; // 2 hours in minutes
 
@@ -69,6 +76,60 @@ export default function Playback() {
           <div className="flex gap-2">
             <Button variant="default">Load Playback Data</Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* File Upload */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Import Data File</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.json,.xlsx,.xls"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          {!uploadedFile ? (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 flex flex-col items-center gap-3 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer"
+            >
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <div className="text-center">
+                <p className="text-sm font-medium">Upload playback data file</p>
+                <p className="text-xs text-muted-foreground mt-1">Supports CSV, JSON, XLSX</p>
+              </div>
+            </button>
+          ) : (
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">{uploadedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => { /* TODO: parse and load file data */ }}>
+                  Load
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setUploadedFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
