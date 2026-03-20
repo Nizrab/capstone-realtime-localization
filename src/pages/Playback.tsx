@@ -79,6 +79,60 @@ export default function Playback() {
         </CardContent>
       </Card>
 
+      {/* File Upload */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Import Data File</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.json,.xlsx,.xls"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          {!uploadedFile ? (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 flex flex-col items-center gap-3 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer"
+            >
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <div className="text-center">
+                <p className="text-sm font-medium">Upload playback data file</p>
+                <p className="text-xs text-muted-foreground mt-1">Supports CSV, JSON, XLSX</p>
+              </div>
+            </button>
+          ) : (
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">{uploadedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => { /* TODO: parse and load file data */ }}>
+                  Load
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setUploadedFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Playback Controls */}
       <Card>
         <CardHeader>
