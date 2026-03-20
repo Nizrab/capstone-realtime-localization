@@ -8,28 +8,25 @@ import {
   PlayCircle, 
   BarChart3, 
   Settings,
-  Search,
-  Activity,
   MapPin,
-  LogOut,
-  User
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRTLSStore } from '@/store/useRTLSStore';
 import { useLogin } from '@/contexts/LoginContext';
 import { useAuth, RequireRole } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import GlobalSearch from '@/components/layout/GlobalSearch';
 
 const navItems = [
   { path: '/', label: 'Overview', icon: LayoutDashboard, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/map', label: 'Live Map', icon: Map, roles: ['admin', 'nurse', 'backend'] as const },
-  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin', 'backend'] as const },
+  { path: '/inventory', label: 'Inventory', icon: Radio, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/alerts', label: 'Alerts', icon: Bell, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/playback', label: 'Playback', icon: PlayCircle, roles: ['admin', 'nurse', 'backend'] as const },
   { path: '/dashboards', label: 'Dashboards', icon: BarChart3, roles: ['admin', 'nurse', 'backend'] as const },
-  { path: '/patients', label: 'Patients', icon: Activity, roles: ['admin', 'nurse', 'backend'] as const },
+  
   { path: '/admin', label: 'Admin', icon: Settings, roles: ['admin', 'backend'] as const },
 ];
 
@@ -39,7 +36,7 @@ export default function AppLayout() {
   const { health, alerts } = useRTLSStore();
   const { user, logout } = useLogin();
   const { roles, hasRole } = useAuth();
-  const [searchOpen, setSearchOpen] = useState(false);
+  
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -123,43 +120,7 @@ export default function AppLayout() {
         {/* Top Bar */}
         <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4">
           {/* Search */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search assets, patients, tags, anchors... (⌘K)"
-                className="pl-8 bg-background"
-                onFocus={() => setSearchOpen(true)}
-              />
-            </div>
-          </div>
-
-          {/* Health Pills */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-mono">
-              <Activity className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Latency:</span>
-              <Badge 
-                variant="outline" 
-                className={cn(
-                  health.ingestToUiMs > 200 ? "severity-warning" : "status-online"
-                )}
-              >
-                {health.ingestToUiMs}ms
-              </Badge>
-            </div>
-            <div className="text-xs font-mono">
-              <span className="text-muted-foreground">Loss:</span>
-              <span className={cn("ml-1.5", health.packetLossPct > 1 ? "text-severity-warning" : "text-status-online")}>
-                {health.packetLossPct.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-
-          {/* Env Badge */}
-          <Badge variant="outline" className="font-mono text-xs">
-            PILOT
-          </Badge>
+          <GlobalSearch />
 
           {/* User Info */}
           <div className="flex items-center gap-2">

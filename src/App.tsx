@@ -14,7 +14,6 @@ import Playback from "./pages/Playback";
 import Dashboards from "./pages/Dashboards";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
-import Patients from "./pages/Patients";
 import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -40,7 +39,7 @@ const App = () => (
                 <Route path="playback" element={<Playback />} />
                 <Route path="dashboards" element={<Dashboards />} />
                 <Route path="admin" element={<Admin />} />
-                <Route path="patients" element={<Patients />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, SkipBack, SkipForward, Download } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 export default function Playback() {
@@ -68,10 +68,6 @@ export default function Playback() {
           </div>
           <div className="flex gap-2">
             <Button variant="default">Load Playback Data</Button>
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export to CSV
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -132,7 +128,7 @@ export default function Playback() {
           {/* Speed Control */}
           <div className="flex items-center justify-center gap-2">
             <span className="text-sm text-muted-foreground">Speed:</span>
-            {[0.5, 1, 2, 4, 8].map((s) => (
+            {[0.5, 0.75, 1, 1.25, 1.5].map((s) => (
               <Button
                 key={s}
                 variant={speed === s ? 'default' : 'outline'}
