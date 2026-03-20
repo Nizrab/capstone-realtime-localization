@@ -23,12 +23,8 @@ const BUILDING = {
   building: 'Azrieli Pavilion (AP)',
 };
 
-const FLOORS: FloorConfig[] = [
-  { id: 'ap-1', label: 'Floor 1', floor: 1, widthMeters: 60, heightMeters: 30 },
-  { id: 'ap-2', label: 'Floor 2', floor: 2, widthMeters: 60, heightMeters: 30 },
-  { id: 'ap-3', label: 'Floor 3', floor: 3, widthMeters: 60, heightMeters: 30 },
-  { id: 'ap-4', label: 'Floor 4', floor: 4, widthMeters: 60, heightMeters: 30 },
-];
+// Floors will be configured from backend API
+const FLOORS: FloorConfig[] = [];
 
 // ─── Static device types ────────────────────────────────────────
 interface MapDevice {
@@ -85,7 +81,7 @@ function MapController({ bounds }: { bounds: L.LatLngBounds }) {
 
 // ─── Main component ─────────────────────────────────────────────
 export default function LiveMap() {
-  const [enabledFloors, setEnabledFloors] = useState<Set<string>>(new Set(['ap-1']));
+  const [enabledFloors, setEnabledFloors] = useState<Set<string>>(new Set());
   const [showAnchors, setShowAnchors] = useState(true);
   const [showRogues, setShowRogues] = useState(true);
   const [showTags, setShowTags] = useState(true);
