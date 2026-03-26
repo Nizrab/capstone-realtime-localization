@@ -23,12 +23,8 @@ const BUILDING = {
   building: 'Azrieli Pavilion (AP)',
 };
 
-const FLOORS: FloorConfig[] = [
-  { id: 'ap-1', label: 'Floor 1', floor: 1, widthMeters: 60, heightMeters: 30 },
-  { id: 'ap-2', label: 'Floor 2', floor: 2, widthMeters: 60, heightMeters: 30 },
-  { id: 'ap-3', label: 'Floor 3', floor: 3, widthMeters: 60, heightMeters: 30 },
-  { id: 'ap-4', label: 'Floor 4', floor: 4, widthMeters: 60, heightMeters: 30 },
-];
+// Floors will be configured from backend API
+const FLOORS: FloorConfig[] = [];
 
 // ─── Static device types ────────────────────────────────────────
 interface MapDevice {
@@ -43,53 +39,8 @@ interface MapDevice {
   lastSeen: string;
 }
 
-const now = new Date().toISOString();
-
-const STATIC_DEVICES: MapDevice[] = [
-  // ── Floor 1 Anchors (mapped to floorplan rooms) ──
-  { id: 'ANC-101', label: 'AP1-UWB-01', type: 'anchor', floorId: 'ap-1', room: 'Stairwell A', position: { x: 25, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-102', label: 'AP1-UWB-02', type: 'anchor', floorId: 'ap-1', room: 'Lecture Room', position: { x: 55, y: 8 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-103', label: 'AP1-BLE-01', type: 'anchor', floorId: 'ap-1', room: 'Lab', position: { x: 15, y: 22 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-104', label: 'AP1-UWB-03', type: 'anchor', floorId: 'ap-1', room: 'Lab', position: { x: 40, y: 22 }, status: 'degraded', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-105', label: 'AP1-BLE-02', type: 'anchor', floorId: 'ap-1', room: 'Lecture Room', position: { x: 55, y: 20 }, status: 'online', tech: 'BLE', lastSeen: now },
-  // ── Floor 1 Rogues ──
-  { id: 'ROG-101', label: 'Rogue-AP1', type: 'rogue', floorId: 'ap-1', room: 'Stairwell A', position: { x: 30, y: 8 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  { id: 'ROG-102', label: 'Rogue-AP2', type: 'rogue', floorId: 'ap-1', room: 'Lab', position: { x: 25, y: 18 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  { id: 'ROG-103', label: 'Apple', type: 'rogue', floorId: 'ap-2', room: 'Reception', position: { x: 55, y: 26 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  // ── Floor 1 Tags ──
-  { id: 'TAG-101', label: 'Tag-Student-A', type: 'tag', floorId: 'ap-1', room: 'Lab', position: { x: 28, y: 24 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'TAG-102', label: 'Tag-Equipment-1', type: 'tag', floorId: 'ap-1', room: 'Lecture Room', position: { x: 54, y: 15 }, status: 'online', tech: 'BLE', lastSeen: now },
-
-  // ── Floor 2 Anchors (mapped to floorplan rooms) ──
-  { id: 'ANC-201', label: 'AP2-UWB-01', type: 'anchor', floorId: 'ap-2', room: 'Stairwell A', position: { x: 15, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-202', label: 'AP2-UWB-02', type: 'anchor', floorId: 'ap-2', room: 'Entrance', position: { x: 42, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-203', label: 'AP2-BLE-01', type: 'anchor', floorId: 'ap-2', room: 'Reception', position: { x: 55, y: 8 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-204', label: 'AP2-UWB-03', type: 'anchor', floorId: 'ap-2', room: 'Labs', position: { x: 18, y: 24 }, status: 'offline', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-205', label: 'AP2-BLE-02', type: 'anchor', floorId: 'ap-2', room: 'Staff Offices', position: { x: 56, y: 16 }, status: 'online', tech: 'BLE', lastSeen: now },
-  // ── Floor 2 Rogues ──
-  { id: 'ROG-201', label: 'Rogue-AP3', type: 'rogue', floorId: 'ap-2', room: 'Washroom', position: { x: 25, y: 14 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  { id: 'ROG-202', label: 'Rogue-AP5', type: 'rogue', floorId: 'ap-2', room: 'Storage', position: { x: 12, y: 14 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  // ── Floor 2 Tags ──
-  { id: 'TAG-201', label: 'Tag-Laptop-B', type: 'tag', floorId: 'ap-2', room: 'Labs', position: { x: 22, y: 22 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'TAG-202', label: 'Tag-Projector-1', type: 'tag', floorId: 'ap-2', room: 'Staff Rooms', position: { x: 52, y: 23 }, status: 'degraded', tech: 'BLE', lastSeen: now },
-
-  // ── Floor 3 Anchors (mapped to floorplan rooms) ──
-  { id: 'ANC-301', label: 'AP3-UWB-01', type: 'anchor', floorId: 'ap-3', room: 'Stairwell A', position: { x: 2, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-302', label: 'AP3-BLE-01', type: 'anchor', floorId: 'ap-3', room: 'Labs (Top Right)', position: { x: 52, y: 5 }, status: 'online', tech: 'BLE', lastSeen: now },
-  { id: 'ANC-303', label: 'AP3-UWB-02', type: 'anchor', floorId: 'ap-3', room: 'Labs (Bottom)', position: { x: 25, y: 24 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-304', label: 'AP3-BLE-02', type: 'anchor', floorId: 'ap-3', room: 'Labs (Bottom Right)', position: { x: 52, y: 22 }, status: 'online', tech: 'BLE', lastSeen: now },
-  // ── Floor 3 Rogues ──
-  { id: 'ROG-301', label: 'Rogue-AP4', type: 'rogue', floorId: 'ap-3', room: 'Washroom', position: { x: 28, y: 13 }, status: 'online', tech: 'WIFI', lastSeen: now },
-  // ── Floor 3 Tags ──
-  { id: 'TAG-301', label: 'Tag-Faculty-C', type: 'tag', floorId: 'ap-3', room: 'Stairwell B', position: { x: 38, y: 13 }, status: 'online', tech: 'UWB', lastSeen: now },
-
-  // ── Floor 4 Anchors (mapped to floorplan rooms) ──
-  { id: 'ANC-401', label: 'AP4-UWB-01', type: 'anchor', floorId: 'ap-4', room: 'Stairwell A', position: { x: 20, y: 5 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-402', label: 'AP4-UWB-02', type: 'anchor', floorId: 'ap-4', room: 'Stairwell B', position: { x: 38, y: 12 }, status: 'online', tech: 'UWB', lastSeen: now },
-  { id: 'ANC-403', label: 'AP4-BLE-01', type: 'anchor', floorId: 'ap-4', room: 'Lab', position: { x: 55, y: 12 }, status: 'degraded', tech: 'BLE', lastSeen: now },
-  // ── Floor 4 Tags ──
-  { id: 'TAG-401', label: 'Tag-Server-Rack', type: 'tag', floorId: 'ap-4', room: 'Stairwell A', position: { x: 15, y: 7 }, status: 'online', tech: 'UWB', lastSeen: now },
-];
+// Devices will be populated from backend API
+const STATIC_DEVICES: MapDevice[] = [];
 
 // ─── Icons ──────────────────────────────────────────────────────
 const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) => {
@@ -112,50 +63,11 @@ const makeIcon = (type: MapDevice['type'], status: string, isPinged: boolean) =>
   });
 };
 
-// ─── Floor SVG generators ────────────────────────────────────────
-const svgRoom = (x: number, y: number, w: number, h: number, label: string) =>
-  `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#94a3b8" stroke-width="2"/>${label ? `<text x="${x + w / 2}" y="${y + h / 2 + 5}" fill="#64748b" font-size="13" font-family="monospace" text-anchor="middle">${label}</text>` : ''}`;
-
-const FLOOR_SVG_BUILDERS: Record<string, (w: number, h: number) => string> = {
-  'ap-1': (w, h) => [
-    svgRoom(20, 20, w * 0.6, h * 0.28, 'Stairwell A'),
-    svgRoom(20, h * 0.28 + 20, w * 0.65, h * 0.12, ''),
-    svgRoom(20, h * 0.42, w * 0.65, h * 0.56, 'Lab'),
-    svgRoom(w * 0.7, 20, w * 0.28, h * 0.96, 'Lecture Room'),
-  ].join(''),
-  'ap-2': (w, h) => [
-    svgRoom(20, 20, w * 0.5, h * 0.25, 'Stairwell A'),
-    svgRoom(w * 0.5 + 20, 20, w * 0.18, h * 0.25, 'Entrance'),
-    svgRoom(w * 0.72, 20, w * 0.26, h * 0.2, 'Reception'),
-    svgRoom(60, h * 0.3, w * 0.15, h * 0.22, 'Storage'),
-    svgRoom(60 + w * 0.16, h * 0.3, w * 0.16, h * 0.22, 'Washroom'),
-    svgRoom(60 + w * 0.33, h * 0.3, w * 0.16, h * 0.22, 'Stairwell B'),
-    svgRoom(w * 0.72, h * 0.22, w * 0.26, h * 0.28, 'Staff Offices'),
-    svgRoom(20, h * 0.56, w * 0.65, h * 0.42, 'Labs'),
-    svgRoom(w * 0.72, h * 0.52, w * 0.26, h * 0.46, 'Staff Rooms'),
-  ].join(''),
-  'ap-3': (w, h) => [
-    svgRoom(20, 20, w * 0.6, h * 0.25, 'Stairwell A'),
-    svgRoom(w * 0.65, 20, w * 0.33, h * 0.3, 'Labs'),
-    svgRoom(60, h * 0.28, w * 0.15, h * 0.22, 'Storage'),
-    svgRoom(60 + w * 0.16, h * 0.28, w * 0.16, h * 0.22, 'Washroom'),
-    svgRoom(60 + w * 0.33, h * 0.28, w * 0.16, h * 0.22, 'Stairwell B'),
-    svgRoom(20, h * 0.54, w * 0.62, h * 0.44, 'Labs'),
-    svgRoom(w * 0.65, h * 0.34, w * 0.33, h * 0.64, 'Labs'),
-  ].join(''),
-  'ap-4': (w, h) => [
-    svgRoom(20, 20, w * 0.62, h * 0.35, 'Stairwell A'),
-    svgRoom(w * 0.35, h * 0.38, w * 0.28, h * 0.32, 'Stairwell B'),
-    svgRoom(w * 0.68, 20, w * 0.3, h * 0.96, 'Lab'),
-    svgRoom(20, h * 0.38, w * 0.62, h * 0.6, ''),
-  ].join(''),
-};
-
+// ─── Floor SVG generators (placeholder until AWS API connected) ──
 const makeFloorSvg = (floor: FloorConfig) => {
   const w = floor.widthMeters * 20;
   const h = floor.heightMeters * 20;
-  const rooms = FLOOR_SVG_BUILDERS[floor.id]?.(w, h) ?? '';
-  return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none"/>${rooms}</svg>`)}`;
+  return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none" stroke-dasharray="8 4"/><text x="${w/2}" y="${h/2 - 10}" fill="#94a3b8" font-size="16" font-family="sans-serif" text-anchor="middle">Awaiting AWS API</text><text x="${w/2}" y="${h/2 + 14}" fill="#cbd5e1" font-size="12" font-family="sans-serif" text-anchor="middle">${floor.label}</text></svg>`)}`;
 };
 
 // ─── Map controller ─────────────────────────────────────────────
@@ -169,7 +81,7 @@ function MapController({ bounds }: { bounds: L.LatLngBounds }) {
 
 // ─── Main component ─────────────────────────────────────────────
 export default function LiveMap() {
-  const [enabledFloors, setEnabledFloors] = useState<Set<string>>(new Set(['ap-1']));
+  const [enabledFloors, setEnabledFloors] = useState<Set<string>>(new Set());
   const [showAnchors, setShowAnchors] = useState(true);
   const [showRogues, setShowRogues] = useState(true);
   const [showTags, setShowTags] = useState(true);
