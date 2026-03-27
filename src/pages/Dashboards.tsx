@@ -1,6 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockAccuracyMetrics } from '@/data/mockData';
+import type { AccuracyMetrics } from '@/types/rtls';
+
+const accuracyMetrics: AccuracyMetrics[] = [
+  { tech: 'WIFI_RTT', rmse: 2.12, cep50: 1.92, cep95: 4.35, sampleCount: 0 },
+];
 import { BarChart3, TrendingUp, Activity, Battery } from 'lucide-react';
 
 export default function Dashboards() {
@@ -17,7 +21,7 @@ export default function Dashboards() {
       <div>
         <h2 className="text-lg font-semibold mb-4">Accuracy Metrics</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {mockAccuracyMetrics.map((metric) => (
+          {accuracyMetrics.map((metric) => (
             <Card key={metric.tech}>
               <CardHeader>
                 <div className="flex items-center justify-between">
