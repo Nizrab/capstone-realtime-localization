@@ -1,16 +1,17 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useRTLSStore } from '@/store/useRTLSStore';
-import { mockAnchors, mockTags } from '@/data/mockData';
+import { fetchAnchors, fetchTags, type APIAnchor, type APITag } from '@/lib/api';
 import StatusBadge from '@/components/StatusBadge';
-import { Search, Download, Wifi } from 'lucide-react';
+import { Search, Download, Wifi, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import type { Anchor, Tag } from '@/types/rtls';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -21,6 +22,33 @@ interface NetworkDevice {
   mac: string;
   status: string;
   lastSeen: string;
+}
+
+function mapAPIAnchor(a: APIAnchor): Anchor {
+  return {
+    id: a.id,
+    label: a.label,
+    tech: (a.tech as Anchor['tech']) || 'WIFI_RTT',
+    position: { x: 0, y: 0 },
+    firmware: a.firmware || '—',
+    status: (a.status as Anchor['status']) || 'online',
+    rssi: a.rssi ?? undefined,
+    lastSeen: a.lastSeen || new Date().toISOString(),
+  };
+}
+
+function mapAPITag(t: APITag): Tag {
+  return {
+    id: t.id,
+    label: t.label,
+    tech: (t.tech as Tag['tech']) || 'WIFI_RTT',
+    batteryPct: t.batteryPct ?? 100,
+    sensors: {},
+    firmware: t.firmware || '—',
+    lastSeen: t.lastSeen || new Date().toISOString(),
+    position: t.position,
+    status: t.status,
+  };
 }
 
 export default function Inventory() {
@@ -34,11 +62,29 @@ export default function Inventory() {
   const [networkLoading, setNetworkLoading] = useState(false);
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [apiAnchors, apiTags] = await Promise.all([fetchAnchors(), fetchTags()]);
+      setAnchors(apiAnchors.map(mapAPIAnchor));
+      setTags(apiTags.map(mapAPITag));
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch data');
+    } finally {
+      setLoading(false);
+    }
+  }, [setAnchors, setTags]);
 
   useEffect(() => {
-    setAnchors(mockAnchors);
-    setTags(mockTags);
-  }, [setAnchors, setTags]);
+    loadData();
+    intervalRef.current = setInterval(loadData, 10000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [loadData]);
 
   const fetchNetworkDevices = useCallback(async () => {
     if (!API_BASE_URL) {
@@ -59,25 +105,20 @@ export default function Inventory() {
     }
   }, []);
 
-  // Poll network devices every 5s when admin views the tab
   const urlTab = searchParams.get('tab');
   const urlHighlight = searchParams.get('highlight');
   const [activeTab, setActiveTab] = useState(urlTab || 'anchors');
 
-  // Handle URL params for tab switching and highlighting
   useEffect(() => {
-    if (urlTab) {
-      setActiveTab(urlTab);
-    }
+    if (urlTab) setActiveTab(urlTab);
     if (urlHighlight) {
       setHighlightId(urlHighlight);
-      // Clear highlight after 3 seconds
       const timeout = setTimeout(() => setHighlightId(null), 3000);
-      // Clean URL params
       setSearchParams({}, { replace: true });
       return () => clearTimeout(timeout);
     }
   }, [urlTab, urlHighlight, setSearchParams]);
+
   useEffect(() => {
     if (activeTab !== 'network' || !hasRole('admin')) return;
     fetchNetworkDevices();
@@ -112,15 +153,15 @@ export default function Inventory() {
     let filename = '';
 
     if (activeTab === 'anchors') {
-      csvContent = 'ID,Label,Technology,Status,Firmware,Last Seen\n';
+      csvContent = 'ID,Label,Technology,Status,RSSI,Firmware,Last Seen\n';
       anchors.forEach((a) => {
-        csvContent += `${a.id},${a.label},${a.tech},${a.status},${a.firmware},${new Date(a.lastSeen).toLocaleString()}\n`;
+        csvContent += `${a.id},${a.label},${a.tech},${a.status},${a.rssi ?? ''},${a.firmware},${new Date(a.lastSeen).toLocaleString()}\n`;
       });
       filename = 'anchors.csv';
     } else if (activeTab === 'tags') {
-      csvContent = 'ID,Label,Technology,Battery %,Firmware,Last Seen\n';
+      csvContent = 'ID,Label,Technology,Status,Position X,Position Y,Floor,Room,Confidence,Firmware,Last Seen\n';
       tags.forEach((t) => {
-        csvContent += `${t.id},${t.label},${t.tech},${t.batteryPct},${t.firmware},${new Date(t.lastSeen).toLocaleString()}\n`;
+        csvContent += `${t.id},${t.label},${t.tech},${t.status ?? ''},${t.position?.x ?? ''},${t.position?.y ?? ''},,,,${t.firmware},${new Date(t.lastSeen).toLocaleString()}\n`;
       });
       filename = 'tags.csv';
     } else if (activeTab === 'network') {
@@ -139,6 +180,7 @@ export default function Inventory() {
     link.click();
     URL.revokeObjectURL(url);
   };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -147,11 +189,23 @@ export default function Inventory() {
           <p className="text-muted-foreground text-sm mt-1">
             Manage and monitor all anchors, tags, and devices
           </p>
+          {error && (
+            <p className="text-destructive text-xs mt-1 flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-destructive" />
+              {error}
+            </p>
+          )}
         </div>
-        <Button variant="outline" size="sm" onClick={handleExportCSV}>
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+            Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -185,51 +239,60 @@ export default function Inventory() {
             <CardHeader>
               <CardTitle className="text-sm font-medium">
                 Anchors ({filteredAnchors.length})
+                {loading && <Badge variant="outline" className="ml-2 text-xs animate-pulse">Updating…</Badge>}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="border-b border-border">
-                    <tr className="text-left">
-                      <th className="pb-3 font-medium text-muted-foreground">ID</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Label</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Technology</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAnchors.map((anchor) => (
-                      <tr
-                        key={anchor.id}
-                        id={`row-${anchor.id}`}
-                        className={cn(
-                          "border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors duration-500",
-                          highlightId === anchor.id && "bg-primary/15 ring-1 ring-primary/30"
-                        )}
-                        ref={highlightId === anchor.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
-                      >
-                        <td className="py-3 font-mono text-xs">{anchor.id}</td>
-                        <td className="py-3 font-medium">{anchor.label}</td>
-                        <td className="py-3">
-                          <Badge variant="outline" className="text-xs">
-                            {anchor.tech}
-                          </Badge>
-                        </td>
-                        <td className="py-3">
-                          <StatusBadge status={anchor.status} />
-                        </td>
-                        <td className="py-3 font-mono text-xs">{anchor.firmware}</td>
-                        <td className="py-3 text-xs text-muted-foreground">
-                          {new Date(anchor.lastSeen).toLocaleTimeString()}
-                        </td>
+              {filteredAnchors.length === 0 && !loading ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  {error ? 'Unable to fetch anchors. Check API configuration.' : 'No anchors found. Waiting for API data…'}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b border-border">
+                      <tr className="text-left">
+                        <th className="pb-3 font-medium text-muted-foreground">ID</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Label</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Technology</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Status</th>
+                        <th className="pb-3 font-medium text-muted-foreground">RSSI</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredAnchors.map((anchor) => (
+                        <tr
+                          key={anchor.id}
+                          id={`row-${anchor.id}`}
+                          className={cn(
+                            "border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors duration-500",
+                            highlightId === anchor.id && "bg-primary/15 ring-1 ring-primary/30"
+                          )}
+                          ref={highlightId === anchor.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
+                        >
+                          <td className="py-3 font-mono text-xs">{anchor.id}</td>
+                          <td className="py-3 font-medium">{anchor.label}</td>
+                          <td className="py-3">
+                            <Badge variant="outline" className="text-xs">
+                              {anchor.tech}
+                            </Badge>
+                          </td>
+                          <td className="py-3">
+                            <StatusBadge status={anchor.status} />
+                          </td>
+                          <td className="py-3 font-mono text-xs">{anchor.rssi ?? '—'}</td>
+                          <td className="py-3 font-mono text-xs">{anchor.firmware}</td>
+                          <td className="py-3 text-xs text-muted-foreground">
+                            {new Date(anchor.lastSeen).toLocaleTimeString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -249,63 +312,64 @@ export default function Inventory() {
             <CardHeader>
               <CardTitle className="text-sm font-medium">
                 Tags ({filteredTags.length})
+                {loading && <Badge variant="outline" className="ml-2 text-xs animate-pulse">Updating…</Badge>}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="border-b border-border">
-                    <tr className="text-left">
-                      <th className="pb-3 font-medium text-muted-foreground">ID</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Label</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Technology</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Battery</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredTags.map((tag) => (
-                      <tr
-                        key={tag.id}
-                        id={`row-${tag.id}`}
-                        className={cn(
-                          "border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors duration-500",
-                          highlightId === tag.id && "bg-primary/15 ring-1 ring-primary/30"
-                        )}
-                        ref={highlightId === tag.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
-                      >
-                        <td className="py-3 font-mono text-xs">{tag.id}</td>
-                        <td className="py-3 font-medium">{tag.label}</td>
-                        <td className="py-3">
-                          <Badge variant="outline" className="text-xs">
-                            {tag.tech}
-                          </Badge>
-                        </td>
-                        <td className="py-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-16 h-1.5 rounded-full ${
-                                tag.batteryPct > 50
-                                  ? 'bg-status-online'
-                                  : tag.batteryPct > 20
-                                  ? 'bg-status-degraded'
-                                  : 'bg-status-critical'
-                              }`}
-                              style={{ width: `${Math.max(12, tag.batteryPct / 100 * 64)}px` }}
-                            />
-                            <span className="font-mono text-xs">{tag.batteryPct}%</span>
-                          </div>
-                        </td>
-                        <td className="py-3 font-mono text-xs">{tag.firmware}</td>
-                        <td className="py-3 text-xs text-muted-foreground">
-                          {new Date(tag.lastSeen).toLocaleTimeString()}
-                        </td>
+              {filteredTags.length === 0 && !loading ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  {error ? 'Unable to fetch tags. Check API configuration.' : 'No tags found. Waiting for API data…'}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b border-border">
+                      <tr className="text-left">
+                        <th className="pb-3 font-medium text-muted-foreground">ID</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Label</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Technology</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Status</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Position</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Confidence</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredTags.map((tag) => (
+                        <tr
+                          key={tag.id}
+                          id={`row-${tag.id}`}
+                          className={cn(
+                            "border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors duration-500",
+                            highlightId === tag.id && "bg-primary/15 ring-1 ring-primary/30"
+                          )}
+                          ref={highlightId === tag.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
+                        >
+                          <td className="py-3 font-mono text-xs">{tag.id}</td>
+                          <td className="py-3 font-medium">{tag.label}</td>
+                          <td className="py-3">
+                            <Badge variant="outline" className="text-xs">
+                              {tag.tech}
+                            </Badge>
+                          </td>
+                          <td className="py-3">
+                            <StatusBadge status={(tag.status as any) || 'online'} />
+                          </td>
+                          <td className="py-3 font-mono text-xs">
+                            {tag.position ? `(${tag.position.x.toFixed(1)}, ${tag.position.y.toFixed(1)})` : '—'}
+                          </td>
+                          <td className="py-3 font-mono text-xs">—</td>
+                          <td className="py-3 font-mono text-xs">{tag.firmware}</td>
+                          <td className="py-3 text-xs text-muted-foreground">
+                            {new Date(tag.lastSeen).toLocaleTimeString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

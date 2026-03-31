@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRTLSStore } from "@/store/useRTLSStore";
-import { mockAlerts } from "@/data/mockData";
+// Alerts will come from API in the future
 import StatusBadge from "@/components/StatusBadge";
 import { Check, X, Filter } from "lucide-react";
 import {
@@ -20,9 +20,8 @@ export default function Alerts() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  useEffect(() => {
-    setAlerts(mockAlerts);
-  }, [setAlerts]);
+  // Alerts will be populated from backend API
+  // useEffect(() => { fetchAlerts().then(setAlerts); }, [setAlerts]);
 
   const filteredAlerts = alerts.filter((alert) => {
     if (severityFilter !== "all" && alert.severity !== severityFilter)

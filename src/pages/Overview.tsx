@@ -1,49 +1,80 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRTLSStore } from "@/store/useRTLSStore";
-import { mockAnchors, mockTags, mockAlerts } from "@/data/mockData";
+import { fetchAnchors, fetchTags, fetchHealth, type APIHealth } from "@/lib/api";
 import StatusBadge from "@/components/StatusBadge";
-import { Radio, Tag, Bell, Activity, TrendingUp } from "lucide-react";
+import { Radio, Tag, Activity, Server, Database, Cloud } from "lucide-react";
+import type { Anchor, Tag as TagType } from "@/types/rtls";
 
 export default function Overview() {
-  const {
-    anchors,
-    tags,
-    alerts,
-    health,
-    setAnchors,
-    setTags,
-    setAlerts,
-    setHealth,
-  } = useRTLSStore();
+  const { anchors, tags, setAnchors, setTags } = useRTLSStore();
+  const [apiHealth, setApiHealth] = useState<APIHealth | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const loadData = useCallback(async () => {
+    try {
+      const [apiAnchors, apiTags, health] = await Promise.all([
+        fetchAnchors(),
+        fetchTags(),
+        fetchHealth(),
+      ]);
+      setAnchors(
+        apiAnchors.map((a): Anchor => ({
+          id: a.id,
+          label: a.label,
+          tech: (a.tech as Anchor["tech"]) || "WIFI_RTT",
+          position: { x: 0, y: 0 },
+          firmware: a.firmware || "—",
+          status: (a.status as Anchor["status"]) || "online",
+          rssi: a.rssi ?? undefined,
+          lastSeen: a.lastSeen || new Date().toISOString(),
+        }))
+      );
+      setTags(
+        apiTags.map((t): TagType => ({
+          id: t.id,
+          label: t.label,
+          tech: (t.tech as TagType["tech"]) || "WIFI_RTT",
+          batteryPct: t.batteryPct ?? 100,
+          sensors: {},
+          firmware: t.firmware || "—",
+          lastSeen: t.lastSeen || new Date().toISOString(),
+          position: t.position,
+          status: t.status,
+        }))
+      );
+      setApiHealth(health);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch data");
+    }
+  }, [setAnchors, setTags]);
 
   useEffect(() => {
-    setAnchors(mockAnchors);
-    setTags(mockTags);
-    setAlerts(mockAlerts);
-    setHealth({
-      ingestToUiMs: 132,
-      packetLossPct: 0.4,
-      wsConnected: true,
-      uptime: 3600,
-    });
-  }, [setAnchors, setTags, setAlerts, setHealth]);
+    loadData();
+    intervalRef.current = setInterval(loadData, 10000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [loadData]);
 
   const onlineAnchors = anchors.filter((a) => a.status === "online").length;
-  const degradedAnchors = anchors.filter((a) => a.status === "degraded").length;
-  const lowBatteryTags = tags.filter((t) => t.batteryPct < 20).length;
-  const openAlerts = alerts.filter((a) => a.status === "open").length;
-  const criticalAlerts = alerts.filter(
-    (a) => a.status === "open" && a.severity === "critical"
-  ).length;
+  const totalDevices = tags.length;
 
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">System Overview</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Real-time monitoring of hospital RTLS pilot deployment
+          Real-time monitoring — Carleton University Canal Building RTLS
         </p>
+        {error && (
+          <p className="text-destructive text-xs mt-1 flex items-center gap-1">
+            <span className="inline-block w-2 h-2 rounded-full bg-destructive" />
+            {error}
+          </p>
+        )}
       </div>
 
       {/* Status Cards */}
@@ -51,7 +82,7 @@ export default function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Anchors
+              Access Points
             </CardTitle>
             <Radio className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -60,15 +91,8 @@ export default function Overview() {
               {onlineAnchors}/{anchors.length}
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <StatusBadge status="online" />
-              {degradedAnchors > 0 && (
-                <>
-                  <StatusBadge status="degraded" />
-                  <span className="text-xs text-muted-foreground">
-                    +{degradedAnchors}
-                  </span>
-                </>
-              )}
+              <StatusBadge status={onlineAnchors > 0 ? "online" : "offline"} />
+              <span className="text-xs text-muted-foreground">online</span>
             </div>
           </CardContent>
         </Card>
@@ -76,23 +100,14 @@ export default function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Tags
+              Tracked Devices
             </CardTitle>
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-mono">{tags.length}</div>
+            <div className="text-2xl font-bold font-mono">{totalDevices}</div>
             <div className="flex items-center gap-2 mt-2 text-xs">
-              <span className="text-muted-foreground">Low battery:</span>
-              <span
-                className={
-                  lowBatteryTags > 0
-                    ? "text-severity-warning font-semibold"
-                    : "text-status-online"
-                }
-              >
-                {lowBatteryTags}
-              </span>
+              <span className="text-muted-foreground">Active tags/devices</span>
             </div>
           </CardContent>
         </Card>
@@ -100,160 +115,102 @@ export default function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Open Alerts
-            </CardTitle>
-            <Bell className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-mono">{openAlerts}</div>
-            <div className="flex items-center gap-2 mt-2">
-              {criticalAlerts > 0 && (
-                <>
-                  <StatusBadge status="critical" className="pulse-status" />
-                  <span className="text-xs text-severity-critical font-semibold">
-                    {criticalAlerts} critical
-                  </span>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              System Health
+              API Status
             </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-mono">
-              {health.ingestToUiMs}ms
+              {apiHealth?.status === "healthy" ? "OK" : error ? "ERR" : "…"}
             </div>
-            <div className="flex items-center gap-2 mt-2 text-xs">
-              <span className="text-muted-foreground">Latency</span>
-              {health.ingestToUiMs < 200 ? (
-                <StatusBadge status="online" />
-              ) : (
-                <StatusBadge status="warning" />
-              )}
+            <div className="flex items-center gap-2 mt-2">
+              <StatusBadge
+                status={
+                  apiHealth?.status === "healthy"
+                    ? "online"
+                    : error
+                    ? "critical"
+                    : "degraded"
+                }
+              />
+              <span className="text-xs text-muted-foreground">
+                {apiHealth?.status === "healthy" ? "Connected" : error || "Connecting…"}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              S3 Pipeline
+            </CardTitle>
+            <Database className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold font-mono">
+              {apiHealth?.s3_connected ? "Live" : "—"}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <StatusBadge
+                status={apiHealth?.s3_connected ? "online" : "offline"}
+              />
+              <span className="text-xs text-muted-foreground">
+                {apiHealth?.s3_connected ? "S3 connected" : "Waiting…"}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Technology Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Infrastructure */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">UWB Network</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Server className="h-4 w-4" />
+              Wi-Fi RSSI Network
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Anchors</span>
-              <span className="font-mono">
-                {anchors.filter((a) => a.tech === "UWB").length}
-              </span>
+              <span className="text-muted-foreground">Access Points</span>
+              <span className="font-mono">{anchors.length}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Tags</span>
-              <span className="font-mono">
-                {tags.filter((t) => t.tech === "UWB").length}
-              </span>
+              <span className="text-muted-foreground">Tracked Devices</span>
+              <span className="font-mono">{tags.length}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Avg RMSE</span>
-              <span className="font-mono text-status-online">0.68m</span>
+              <span className="text-muted-foreground">Method</span>
+              <span className="font-mono text-primary">RSSI Trilateration</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">BLE Network</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Cloud className="h-4 w-4" />
+              Data Pipeline
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Anchors</span>
-              <span className="font-mono">
-                {anchors.filter((a) => a.tech === "BLE").length}
-              </span>
+              <span className="text-muted-foreground">Storage</span>
+              <span className="font-mono">AWS S3</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Tags</span>
-              <span className="font-mono">
-                {tags.filter((t) => t.tech === "BLE").length}
-              </span>
+              <span className="text-muted-foreground">Compute</span>
+              <span className="font-mono">Elastic Beanstalk</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Avg RMSE</span>
-              <span className="font-mono text-status-degraded">1.34m</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Wi-Fi RTT</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Anchors</span>
-              <span className="font-mono">
-                {anchors.filter((a) => a.tech === "WIFI_RTT").length}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Tags</span>
-              <span className="font-mono">
-                {tags.filter((t) => t.tech === "WIFI_RTT").length}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Avg RMSE</span>
-              <span className="font-mono text-status-degraded">2.12m</span>
+              <span className="text-muted-foreground">Region</span>
+              <span className="font-mono">us-east-2</span>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent Alerts */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Recent Alerts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {alerts.slice(0, 5).map((alert) => (
-              <div
-                key={alert.id}
-                className="flex items-center justify-between py-2 border-b border-border last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <StatusBadge status={alert.severity} />
-                  <div className="text-sm">
-                    <div className="font-medium">
-                      {alert.type.replace(/_/g, " ")}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(alert.createdAt).toLocaleTimeString()}
-                    </div>
-                  </div>
-                </div>
-                <StatusBadge
-                  status={
-                    alert.status === "open"
-                      ? "critical"
-                      : alert.status === "acked"
-                      ? "warning"
-                      : "online"
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
