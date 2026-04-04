@@ -102,17 +102,7 @@ export default function AppLayout() {
         </nav>
 
         {/* Footer */}
-        <div className="p-3 border-t border-sidebar-border space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Status</span>
-            <Badge className={health.wsConnected ? "status-online" : "status-offline"}>
-              {health.wsConnected ? 'Connected' : 'Disconnected'}
-            </Badge>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            <div>Uptime: {Math.floor(health.uptime / 60)}m</div>
-          </div>
-        </div>
+        <SidebarLatency />
       </aside>
 
       {/* Main Content */}
