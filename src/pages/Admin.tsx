@@ -63,6 +63,7 @@ export default function Admin() {
             API Keys {!hasAnyRole(['admin', 'backend']) && <Lock className="h-3 w-3 ml-1" />}
           </TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="floorplans" className="space-y-4">
@@ -265,6 +266,22 @@ export default function Admin() {
                 </div>
               </div>
               <Button variant="outline" className="w-full">View Audit Logs</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="logs" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Activity Logs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground">
+                No recent activity logs to display.
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
