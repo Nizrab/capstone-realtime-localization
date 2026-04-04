@@ -65,7 +65,7 @@ export default function SidebarLatency() {
         Last poll: {lastPollAt ? `${secondsAgo}s ago` : '—'}
       </div>
       <div className="text-[10px] text-muted-foreground">
-        Pipeline: Backend → Admin → Client
+        Pipeline: Backend → Admin → Client 
       </div>
     </div>
   );
