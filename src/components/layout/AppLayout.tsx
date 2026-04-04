@@ -16,6 +16,7 @@ import { useRTLSStore } from '@/store/useRTLSStore';
 import { useLogin } from '@/contexts/LoginContext';
 import { useAuth, RequireRole } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
+import SidebarLatency from '@/components/layout/SidebarLatency';
 import { Button } from '@/components/ui/button';
 import GlobalSearch from '@/components/layout/GlobalSearch';
 
