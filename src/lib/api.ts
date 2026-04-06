@@ -61,13 +61,11 @@ export async function fetchPositions(): Promise<APIPosition[]> {
 }
 
 export async function fetchAnchors(): Promise<APIAnchor[]> {
-  const d = await apiFetch<{ anchors: APIAnchor[] }>('/api/anchors');
-  return d.anchors || [];
+  return apiFetch<APIAnchor[]>('/api/v1/anchors');
 }
 
 export async function fetchTags(): Promise<APITag[]> {
-  const d = await apiFetch<{ tags: APITag[] }>('/api/tags');
-  return d.tags || [];
+  return apiFetch<APITag[]>('/api/v1/tags');
 }
 
 export async function fetchHealth(): Promise<APIHealth> {
