@@ -184,7 +184,7 @@ export default function LiveMap() {
   }, [floorOffsets]);
 
   return (
-    <div className="h-full flex relative">
+    <div className="h-[calc(100vh-3.5rem)] md:h-full flex relative">
       {/* LEFT PANEL - desktop only */}
       <div className="hidden md:flex w-48 border-r border-border bg-card p-3 flex-col gap-3 overflow-y-auto shrink-0">
         <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">{BUILDING.campus}</div>
