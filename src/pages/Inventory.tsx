@@ -10,6 +10,7 @@ import { Search, Download, Wifi, RefreshCw, Radio, Tag as TagIcon } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { Anchor, Tag } from '@/types/rtls';
 
 function mapAPIAnchor(a: APIAnchor): Anchor {
@@ -51,6 +52,16 @@ function getRssiBgColor(rssi: number): string {
   return 'bg-red-500/10 border-red-500/20';
 }
 
+/* ── Reusable label-value pair for mobile cards ── */
+function LabelValue({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono text-xs text-right">{children}</span>
+    </div>
+  );
+}
+
 export default function Inventory() {
   const { anchors, tags, setAnchors, setTags } = useRTLSStore();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,6 +72,7 @@ export default function Inventory() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isMobile = useIsMobile();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -108,7 +120,6 @@ export default function Inventory() {
       t.id.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
-  // RF Environment filtered data
   const rfSearchLower = rfSearch.toLowerCase();
   const rfFilteredAnchors = anchors.filter(
     (a) =>
@@ -122,7 +133,6 @@ export default function Inventory() {
       t.id.toLowerCase().includes(rfSearchLower)
   );
 
-  // RF stats
   const onlineAnchors = anchors.filter((a) => a.status === 'online').length;
   const anchorsWithRssi = anchors.filter((a) => a.rssi != null);
   const avgRssi = anchorsWithRssi.length > 0
@@ -180,12 +190,13 @@ export default function Inventory() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+        {/* Button group — stack on mobile */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadData} disabled={loading} className="w-full sm:w-auto">
             <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+          <Button variant="outline" size="sm" onClick={handleExportCSV} className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
@@ -206,15 +217,15 @@ export default function Inventory() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Anchors Tab */}
+        {/* ───── Anchors Tab ───── */}
         <TabsContent value="anchors" className="space-y-4">
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search anchors..."
               value={anchorSearch}
               onChange={(e) => setAnchorSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
 
@@ -230,18 +241,42 @@ export default function Inventory() {
                 <div className="text-center py-8 text-muted-foreground text-sm">
                   {error ? 'Unable to fetch anchors. Check API configuration.' : 'No anchors found. Waiting for API data…'}
                 </div>
+              ) : isMobile ? (
+                /* Mobile: card layout */
+                <div className="space-y-3">
+                  {filteredAnchors.map((anchor) => (
+                    <div
+                      key={anchor.id}
+                      className={cn(
+                        "p-4 border border-border rounded-lg space-y-2 transition-colors duration-500",
+                        highlightId === anchor.id && "bg-primary/15 ring-1 ring-primary/30"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm">{anchor.label}</span>
+                        <StatusBadge status={anchor.status} />
+                      </div>
+                      <LabelValue label="ID">{anchor.id}</LabelValue>
+                      <LabelValue label="Technology"><Badge variant="outline" className="text-xs">{anchor.tech}</Badge></LabelValue>
+                      <LabelValue label="RSSI">{anchor.rssi ?? '—'}</LabelValue>
+                      <LabelValue label="Firmware">{anchor.firmware}</LabelValue>
+                      <LabelValue label="Last Seen">{new Date(anchor.lastSeen).toLocaleTimeString()}</LabelValue>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <div className="overflow-x-auto -mx-4 md:mx-0">
-                  <table className="w-full text-xs md:text-sm min-w-[600px]">
+                /* Desktop: table layout */
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
                     <thead className="border-b border-border">
                       <tr className="text-left">
-                        <th className="pb-3 font-medium text-muted-foreground">ID</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Label</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Technology</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                        <th className="pb-3 font-medium text-muted-foreground">RSSI</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">ID</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Label</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Technology</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">RSSI</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Firmware</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Last Seen</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -255,17 +290,17 @@ export default function Inventory() {
                           )}
                           ref={highlightId === anchor.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
                         >
-                          <td className="py-3 font-mono text-xs">{anchor.id}</td>
-                          <td className="py-3 font-medium">{anchor.label}</td>
-                          <td className="py-3">
+                          <td className="px-4 py-3 font-mono text-xs">{anchor.id}</td>
+                          <td className="px-4 py-3 font-medium">{anchor.label}</td>
+                          <td className="px-4 py-3">
                             <Badge variant="outline" className="text-xs">{anchor.tech}</Badge>
                           </td>
-                          <td className="py-3">
+                          <td className="px-4 py-3">
                             <StatusBadge status={anchor.status} />
                           </td>
-                          <td className="py-3 font-mono text-xs">{anchor.rssi ?? '—'}</td>
-                          <td className="py-3 font-mono text-xs">{anchor.firmware}</td>
-                          <td className="py-3 text-xs text-muted-foreground">
+                          <td className="px-4 py-3 font-mono text-xs">{anchor.rssi ?? '—'}</td>
+                          <td className="px-4 py-3 font-mono text-xs">{anchor.firmware}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
                             {new Date(anchor.lastSeen).toLocaleTimeString()}
                           </td>
                         </tr>
@@ -278,15 +313,15 @@ export default function Inventory() {
           </Card>
         </TabsContent>
 
-        {/* Tags Tab */}
+        {/* ───── Tags Tab ───── */}
         <TabsContent value="tags" className="space-y-4">
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search tags..."
               value={tagSearch}
               onChange={(e) => setTagSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
 
@@ -302,19 +337,44 @@ export default function Inventory() {
                 <div className="text-center py-8 text-muted-foreground text-sm">
                   {error ? 'Unable to fetch tags. Check API configuration.' : 'No tags found. Waiting for API data…'}
                 </div>
+              ) : isMobile ? (
+                <div className="space-y-3">
+                  {filteredTags.map((tag) => (
+                    <div
+                      key={tag.id}
+                      className={cn(
+                        "p-4 border border-border rounded-lg space-y-2 transition-colors duration-500",
+                        highlightId === tag.id && "bg-primary/15 ring-1 ring-primary/30"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm">{tag.label}</span>
+                        <StatusBadge status={(tag.status as any) || 'online'} />
+                      </div>
+                      <LabelValue label="ID">{tag.id}</LabelValue>
+                      <LabelValue label="Technology"><Badge variant="outline" className="text-xs">{tag.tech}</Badge></LabelValue>
+                      <LabelValue label="Position">
+                        {tag.position ? `(${tag.position.x.toFixed(1)}, ${tag.position.y.toFixed(1)})` : '—'}
+                      </LabelValue>
+                      <LabelValue label="Confidence">—</LabelValue>
+                      <LabelValue label="Firmware">{tag.firmware}</LabelValue>
+                      <LabelValue label="Last Seen">{new Date(tag.lastSeen).toLocaleTimeString()}</LabelValue>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <div className="overflow-x-auto -mx-4 md:mx-0">
-                  <table className="w-full text-xs md:text-sm min-w-[700px]">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
                     <thead className="border-b border-border">
                       <tr className="text-left">
-                        <th className="pb-3 font-medium text-muted-foreground">ID</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Label</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Technology</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Position</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Confidence</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Firmware</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">ID</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Label</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Technology</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Position</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Confidence</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Firmware</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Last Seen</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -328,20 +388,20 @@ export default function Inventory() {
                           )}
                           ref={highlightId === tag.id ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' }) : undefined}
                         >
-                          <td className="py-3 font-mono text-xs">{tag.id}</td>
-                          <td className="py-3 font-medium">{tag.label}</td>
-                          <td className="py-3">
+                          <td className="px-4 py-3 font-mono text-xs">{tag.id}</td>
+                          <td className="px-4 py-3 font-medium">{tag.label}</td>
+                          <td className="px-4 py-3">
                             <Badge variant="outline" className="text-xs">{tag.tech}</Badge>
                           </td>
-                          <td className="py-3">
+                          <td className="px-4 py-3">
                             <StatusBadge status={(tag.status as any) || 'online'} />
                           </td>
-                          <td className="py-3 font-mono text-xs">
+                          <td className="px-4 py-3 font-mono text-xs">
                             {tag.position ? `(${tag.position.x.toFixed(1)}, ${tag.position.y.toFixed(1)})` : '—'}
                           </td>
-                          <td className="py-3 font-mono text-xs">—</td>
-                          <td className="py-3 font-mono text-xs">{tag.firmware}</td>
-                          <td className="py-3 text-xs text-muted-foreground">
+                          <td className="px-4 py-3 font-mono text-xs">—</td>
+                          <td className="px-4 py-3 font-mono text-xs">{tag.firmware}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
                             {new Date(tag.lastSeen).toLocaleTimeString()}
                           </td>
                         </tr>
@@ -354,7 +414,7 @@ export default function Inventory() {
           </Card>
         </TabsContent>
 
-        {/* RF Environment Tab */}
+        {/* ───── RF Environment Tab ───── */}
         <TabsContent value="rf" className="space-y-4">
           {/* Network Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -393,12 +453,12 @@ export default function Inventory() {
 
           {/* Search */}
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search APs or devices by name, ID, or RSSI..."
               value={rfSearch}
               onChange={(e) => setRfSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
 
@@ -414,31 +474,51 @@ export default function Inventory() {
             <CardContent>
               {rfFilteredAnchors.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground text-sm">No access points found.</div>
+              ) : isMobile ? (
+                <div className="space-y-3">
+                  {rfFilteredAnchors.map((a) => (
+                    <div key={a.id} className="p-4 border border-border rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm">{a.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={cn("inline-block w-2 h-2 rounded-full", a.status === 'online' ? 'bg-green-500' : 'bg-red-500')} />
+                          <span className="text-xs capitalize">{a.status}</span>
+                        </div>
+                      </div>
+                      <LabelValue label="RSSI">
+                        <span className={a.rssi != null ? getRssiColor(a.rssi) : ''}>
+                          {a.rssi != null ? `${a.rssi} dBm` : '—'}
+                        </span>
+                      </LabelValue>
+                      <LabelValue label="Last Seen">{new Date(a.lastSeen).toLocaleTimeString()}</LabelValue>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <div className="overflow-x-auto -mx-4 md:mx-0">
-                  <table className="w-full text-xs md:text-sm min-w-[500px]">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
                     <thead className="border-b border-border">
                       <tr className="text-left">
-                        <th className="pb-3 font-medium text-muted-foreground">AP Name</th>
-                        <th className="pb-3 font-medium text-muted-foreground">RSSI</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">AP Name</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">RSSI</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Last Seen</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rfFilteredAnchors.map((a) => (
                         <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                          <td className="py-3 font-medium">{a.label}</td>
-                          <td className={cn("py-3 font-mono text-xs", a.rssi != null ? getRssiColor(a.rssi) : '')}>
+                          <td className="px-4 py-3 font-medium">{a.label}</td>
+                          <td className={cn("px-4 py-3 font-mono text-xs", a.rssi != null ? getRssiColor(a.rssi) : '')}>
                             {a.rssi != null ? `${a.rssi} dBm` : '—'}
                           </td>
-                          <td className="py-3">
+                          <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <span className={cn("inline-block w-2 h-2 rounded-full", a.status === 'online' ? 'bg-green-500' : 'bg-red-500')} />
                               <span className="text-xs capitalize">{a.status}</span>
                             </div>
                           </td>
-                          <td className="py-3 text-xs text-muted-foreground">
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
                             {new Date(a.lastSeen).toLocaleTimeString()}
                           </td>
                         </tr>
@@ -461,34 +541,54 @@ export default function Inventory() {
             <CardContent>
               {rfFilteredTags.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground text-sm">No devices detected.</div>
+              ) : isMobile ? (
+                <div className="space-y-3">
+                  {rfFilteredTags.map((t) => (
+                    <div key={t.id} className="p-4 border border-border rounded-lg space-y-2">
+                      <span className="font-semibold text-sm block">{t.label}</span>
+                      <LabelValue label="Floor / Room">
+                        {(t.position as any)?.floor ?? '—'} / {(t.position as any)?.room ?? '—'}
+                      </LabelValue>
+                      <LabelValue label="Position">
+                        {t.position ? `(${t.position.x.toFixed(1)}, ${t.position.y.toFixed(1)})` : '—'}
+                      </LabelValue>
+                      <LabelValue label="Confidence">
+                        {(t.position as any)?.confidence != null
+                          ? `${((t.position as any).confidence * 100).toFixed(0)}%`
+                          : '—'}
+                      </LabelValue>
+                      <LabelValue label="Last Seen">{new Date(t.lastSeen).toLocaleTimeString()}</LabelValue>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <div className="overflow-x-auto -mx-4 md:mx-0">
-                  <table className="w-full text-xs md:text-sm min-w-[600px]">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
                     <thead className="border-b border-border">
                       <tr className="text-left">
-                        <th className="pb-3 font-medium text-muted-foreground">Device</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Floor / Room</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Position</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Confidence</th>
-                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Device</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Floor / Room</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Position</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Confidence</th>
+                        <th className="px-4 pb-3 font-medium text-muted-foreground">Last Seen</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rfFilteredTags.map((t) => (
                         <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                          <td className="py-3 font-medium">{t.label}</td>
-                          <td className="py-3 text-xs text-muted-foreground">
+                          <td className="px-4 py-3 font-medium">{t.label}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
                             {(t.position as any)?.floor ?? '—'} / {(t.position as any)?.room ?? '—'}
                           </td>
-                          <td className="py-3 font-mono text-xs">
+                          <td className="px-4 py-3 font-mono text-xs">
                             {t.position ? `(${t.position.x.toFixed(1)}, ${t.position.y.toFixed(1)})` : '—'}
                           </td>
-                          <td className="py-3 font-mono text-xs">
+                          <td className="px-4 py-3 font-mono text-xs">
                             {(t.position as any)?.confidence != null
                               ? `${((t.position as any).confidence * 100).toFixed(0)}%`
                               : '—'}
                           </td>
-                          <td className="py-3 text-xs text-muted-foreground">
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
                             {new Date(t.lastSeen).toLocaleTimeString()}
                           </td>
                         </tr>
