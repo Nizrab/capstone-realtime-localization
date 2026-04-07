@@ -248,8 +248,8 @@ export default function Inventory() {
                   {error ? 'Unable to fetch anchors. Check API configuration.' : 'No anchors found. Waiting for API data…'}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 md:mx-0">
+                  <table className="w-full text-xs md:text-sm min-w-[600px]">
                     <thead className="border-b border-border">
                       <tr className="text-left">
                         <th className="pb-3 font-medium text-muted-foreground">ID</th>
