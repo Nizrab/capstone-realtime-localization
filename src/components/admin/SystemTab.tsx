@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Shield } from 'lucide-react';
 
 interface ToggleSetting {
   key: string;

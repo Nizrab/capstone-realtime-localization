@@ -59,7 +59,7 @@ export default function Admin() {
             Roles & Access {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}
           </TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
+          
         </TabsList>
 
         <TabsContent value="floorplans">
