@@ -77,8 +77,8 @@ export default function Playback() {
               />
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="default">Load Playback Data</Button>
+          <div>
+            <Button variant="default" className="w-full md:w-auto">Load Playback Data</Button>
           </div>
         </CardContent>
       </Card>
