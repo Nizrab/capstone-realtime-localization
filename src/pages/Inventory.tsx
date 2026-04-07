@@ -182,10 +182,10 @@ export default function Inventory() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Inventory</h1>
+          <h1 className="text-xl md:text-2xl font-semibold">Inventory</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Manage and monitor all anchors, tags, and devices
           </p>
@@ -225,7 +225,7 @@ export default function Inventory() {
         </TabsList>
 
         <TabsContent value="anchors" className="space-y-4">
-          <div className="relative max-w-md">
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search anchors..."
@@ -248,8 +248,8 @@ export default function Inventory() {
                   {error ? 'Unable to fetch anchors. Check API configuration.' : 'No anchors found. Waiting for API data…'}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 md:mx-0">
+                  <table className="w-full text-xs md:text-sm min-w-[600px]">
                     <thead className="border-b border-border">
                       <tr className="text-left">
                         <th className="pb-3 font-medium text-muted-foreground">ID</th>
@@ -298,7 +298,7 @@ export default function Inventory() {
         </TabsContent>
 
         <TabsContent value="tags" className="space-y-4">
-          <div className="relative max-w-md">
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search tags..."
@@ -321,8 +321,8 @@ export default function Inventory() {
                   {error ? 'Unable to fetch tags. Check API configuration.' : 'No tags found. Waiting for API data…'}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 md:mx-0">
+                  <table className="w-full text-xs md:text-sm min-w-[700px]">
                     <thead className="border-b border-border">
                       <tr className="text-left">
                         <th className="pb-3 font-medium text-muted-foreground">ID</th>
@@ -376,7 +376,7 @@ export default function Inventory() {
 
         {isAdmin && (
           <TabsContent value="network" className="space-y-4">
-            <div className="relative max-w-md">
+            <div className="relative w-full md:max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by ID, IP, or MAC..."
