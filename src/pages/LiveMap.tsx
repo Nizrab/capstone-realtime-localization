@@ -62,29 +62,38 @@ const makeFloorSvg = (floor: FloorConfig) => {
 
 function MapController({ bounds, isMobile }: { bounds: L.LatLngBounds; isMobile: boolean }) {
   const map = useMap();
-  const initialFitDone = useRef(false);
+  const prevBoundsRef = useRef<string>('');
 
-  // Initial fit with delay to ensure container is measured
+  // Fit bounds on every render / bounds change with delay for container measurement
   useEffect(() => {
+    const boundsKey = `${bounds.getSouthWest().lat},${bounds.getSouthWest().lng}-${bounds.getNorthEast().lat},${bounds.getNorthEast().lng}`;
+    const isNewBounds = boundsKey !== prevBoundsRef.current;
+    prevBoundsRef.current = boundsKey;
+
     const timer = setTimeout(() => {
       map.invalidateSize();
-      map.fitBounds(bounds, { padding: [20, 20], animate: false });
-      initialFitDone.current = true;
-    }, 400);
+      map.fitBounds(bounds, { padding: [40, 40], animate: isNewBounds, maxZoom: 3 });
+    }, 500);
     return () => clearTimeout(timer);
-  }, [map]);
+  }, [map, bounds]);
 
-  // Refit on bounds change (floor toggle etc.)
+  // Also refit when the page becomes visible (tab switch back)
   useEffect(() => {
-    if (!initialFitDone.current) return;
-    map.invalidateSize();
-    map.fitBounds(bounds, { padding: [20, 20], animate: true });
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        setTimeout(() => {
+          map.invalidateSize();
+          map.fitBounds(bounds, { padding: [40, 40], animate: true, maxZoom: 3 });
+        }, 500);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [map, bounds]);
 
   // Move zoom control position on mobile
   useEffect(() => {
     if (isMobile) {
-      // Remove default zoom control and re-add at bottomleft
       map.zoomControl?.remove();
       L.control.zoom({ position: 'bottomleft' }).addTo(map);
     }
