@@ -20,8 +20,8 @@ interface FloorConfig {
 }
 
 const BUILDING = {
-  campus: 'Carleton University',
-  building: 'Canal Building',
+  campus: 'Facility',
+  building: 'Main Building',
 };
 
 // ─── Device type for the map ────────────────────────────────────
