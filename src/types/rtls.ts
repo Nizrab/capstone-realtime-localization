@@ -7,7 +7,11 @@ export type AlertType =
   | "packet_loss"
   | "latency_sla"
   | "privacy_violation"
-  | "unexpected_movement";
+  | "unexpected_movement"
+  | "weak_signal"
+  | "low_confidence"
+  | "tag_lost"
+  | "ap_count_low";
 export type Role =
   | "Operator"
   | "RFLead"
