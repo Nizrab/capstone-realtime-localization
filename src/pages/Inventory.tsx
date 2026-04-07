@@ -321,8 +321,8 @@ export default function Inventory() {
                   {error ? 'Unable to fetch tags. Check API configuration.' : 'No tags found. Waiting for API data…'}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 md:mx-0">
+                  <table className="w-full text-xs md:text-sm min-w-[700px]">
                     <thead className="border-b border-border">
                       <tr className="text-left">
                         <th className="pb-3 font-medium text-muted-foreground">ID</th>
