@@ -109,7 +109,7 @@ export default function Dashboards() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-xs text-muted-foreground">Avg Confidence</div>
               <div className={`text-2xl font-bold font-mono ${colorClass(confidenceLevel(avgPct))}`}>{avgPct}%</div>
