@@ -53,7 +53,7 @@ export default function Admin() {
       )}
 
       <Tabs defaultValue="floorplans" className="w-full">
-        <TabsList>
+        <TabsList className="w-full overflow-x-auto justify-start">
           <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
           <TabsTrigger value="rbac" disabled={!hasRole('admin')}>
             Roles & Access {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}

@@ -264,7 +264,7 @@ export default function Dashboards() {
           <CardTitle className="text-sm font-medium">Pipeline Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center gap-4 py-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 py-4">
             {/* Engine */}
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center gap-2">
