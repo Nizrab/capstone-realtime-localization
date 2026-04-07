@@ -44,7 +44,7 @@ export default function Alerts() {
             Auto-detected from live API data — polling every 10s
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="status-online">{openCount} Open</Badge>
           {criticalCount > 0 && (
             <Badge variant="outline" className="severity-critical pulse-status">{criticalCount} Critical</Badge>
