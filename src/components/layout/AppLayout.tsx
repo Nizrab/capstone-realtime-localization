@@ -168,7 +168,7 @@ export default function AppLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto pb-10 md:pb-0">
+        <main className="flex-1 overflow-auto overflow-x-hidden pb-10 md:pb-0">
           <Outlet />
         </main>
 
