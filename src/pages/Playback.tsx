@@ -46,6 +46,7 @@ export default function Playback() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                className="w-full text-left"
               />
             </div>
             <div>
@@ -54,6 +55,7 @@ export default function Playback() {
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                className="w-full text-left"
               />
             </div>
             <div>
@@ -62,6 +64,7 @@ export default function Playback() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                className="w-full text-left"
               />
             </div>
             <div>
@@ -70,11 +73,12 @@ export default function Playback() {
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                className="w-full text-left"
               />
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="default">Load Playback Data</Button>
+          <div>
+            <Button variant="default" className="w-full md:w-auto">Load Playback Data</Button>
           </div>
         </CardContent>
       </Card>
