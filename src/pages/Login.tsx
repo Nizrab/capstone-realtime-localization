@@ -83,7 +83,7 @@ export default function Login() {
         <div className="text-xs text-muted-foreground space-y-1 bg-muted/50 p-3 rounded-md">
           <div className="font-semibold mb-2">Demo Accounts:</div>
           <div>• <span className="font-mono">admin / admin123</span> - Full access</div>
-          <div>• <span className="font-mono">nurse / nurse123</span> - Patient & clinical data</div>
+          <div>• <span className="font-mono">nurse / nurse123</span> - Clinical data</div>
           <div>• <span className="font-mono">backend / backend123</span> - System metrics only</div>
         </div>
       </Card>

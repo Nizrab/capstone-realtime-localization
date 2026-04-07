@@ -62,8 +62,8 @@ export default function AppLayout() {
       <aside className="w-64 border-r border-border bg-sidebar flex flex-col">
         {/* Logo */}
         <div className="h-14 border-b border-sidebar-border flex items-center px-4">
-          <MapPin className="h-5 w-5 text-primary mr-2" />
-          <span className="font-semibold text-sm">RTLS Pilot Monitor</span>
+          <span className="text-primary text-lg mr-2">🍁</span>
+          <span className="font-semibold text-sm">Canadian Health</span>
         </div>
 
         {/* Navigation */}

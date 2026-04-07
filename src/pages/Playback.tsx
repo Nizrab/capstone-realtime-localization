@@ -231,7 +231,7 @@ export default function Playback() {
               <Badge variant="outline" className="severity-critical">
                 Geofence Breach
               </Badge>
-              <span className="text-sm">Patient-A1 left ICU zone</span>
+              <span className="text-sm">Device-A1 left restricted zone</span>
             </div>
             <div className="flex items-center gap-3 p-2 border-l-2 border-severity-warning pl-3">
               <span className="font-mono text-xs text-muted-foreground">11:45:12</span>
