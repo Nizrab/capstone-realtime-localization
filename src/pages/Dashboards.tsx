@@ -264,38 +264,36 @@ export default function Dashboards() {
           <CardTitle className="text-sm font-medium">Pipeline Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-center justify-center gap-4 py-4">
+          <div className="flex flex-row flex-nowrap items-center justify-center gap-2 sm:gap-3 py-4">
             {/* Engine */}
-            <div className="flex flex-col items-center gap-1">
-              <div className="flex items-center gap-2">
-                <div className={`h-3 w-3 rounded-full ${health && health.status === 'ok' ? 'bg-emerald-500' : 'bg-red-500'} ${health && health.status === 'ok' ? 'animate-pulse' : ''}`} />
-                <Server className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <span className="text-xs font-medium">Engine</span>
-              <span className="text-xs text-muted-foreground">(Backend)</span>
+            <div className="flex flex-col items-center gap-1 shrink-0">
+              <div className={`h-3 w-3 rounded-full ${health && health.status === 'ok' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className="text-[10px] sm:text-xs font-medium leading-tight">Engine</span>
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground leading-tight">(Backend)</span>
             </div>
 
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-px bg-border" />
+            {/* Connector 1 */}
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-muted-foreground text-[10px]">—</span>
               {latencyMs !== null && (
-                <span className="text-xs text-muted-foreground mt-1">{latencyMs}ms</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">{latencyMs}ms</span>
               )}
+              <span className="text-muted-foreground text-[10px]">→</span>
             </div>
 
             {/* AWS S3 */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 shrink-0">
               <div className={`h-3 w-3 rounded-full ${health?.s3_connected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className="text-xs font-medium">AWS S3</span>
+              <span className="text-[10px] sm:text-xs font-medium leading-tight">AWS S3</span>
             </div>
 
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-px bg-border" />
-            </div>
+            {/* Connector 2 */}
+            <span className="text-muted-foreground text-[10px] shrink-0">——→</span>
 
             {/* Frontend */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 shrink-0">
               <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-medium">Frontend</span>
+              <span className="text-[10px] sm:text-xs font-medium leading-tight">Frontend</span>
             </div>
           </div>
         </CardContent>
