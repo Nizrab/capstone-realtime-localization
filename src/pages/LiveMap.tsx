@@ -309,22 +309,37 @@ export default function LiveMap() {
 
         {/* Mobile floor bottom sheet */}
         {isMobile && showFloorSheet && (
-          <div className="absolute bottom-0 left-0 right-0 z-[1001] bg-card border-t border-border rounded-t-xl p-4 max-h-[50vh] overflow-y-auto shadow-2xl">
-            <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-3" />
-            <div className="text-xs text-muted-foreground font-medium mb-2">Floors</div>
-            <div className="space-y-2">
-              {floors.map((f) => {
-                const isEnabled = enabledFloors.has(f.id);
-                const deviceCount = devices.filter((d) => d.floorId === f.id).length;
-                return (
-                  <button key={f.id} onClick={() => toggleFloor(f.id)} className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${isEnabled ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-secondary/50 text-muted-foreground border border-border'}`}>
-                    <span className="font-medium">{f.label}</span>
-                    <Badge variant="outline" className="text-[10px] h-5">{deviceCount}</Badge>
-                  </button>
-                );
-              })}
+          <>
+            <div className="absolute inset-0 z-[1001] bg-black/40" onClick={() => setShowFloorSheet(false)} />
+            <div
+              className="absolute bottom-0 left-0 right-0 z-[1002] bg-card border-t border-border rounded-t-xl p-4 max-h-[50vh] overflow-y-auto shadow-2xl"
+              onTouchStart={(e) => {
+                const startY = e.touches[0].clientY;
+                const el = e.currentTarget;
+                const handleMove = (ev: TouchEvent) => {
+                  const dy = ev.touches[0].clientY - startY;
+                  if (dy > 80) { setShowFloorSheet(false); el.removeEventListener('touchmove', handleMove); }
+                };
+                el.addEventListener('touchmove', handleMove, { passive: true });
+                el.addEventListener('touchend', () => el.removeEventListener('touchmove', handleMove), { once: true });
+              }}
+            >
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/40 mx-auto mb-3 cursor-grab" />
+              <div className="text-xs text-muted-foreground font-medium mb-2">Floors</div>
+              <div className="space-y-2">
+                {floors.map((f) => {
+                  const isEnabled = enabledFloors.has(f.id);
+                  const deviceCount = devices.filter((d) => d.floorId === f.id).length;
+                  return (
+                    <button key={f.id} onClick={() => toggleFloor(f.id)} className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${isEnabled ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-secondary/50 text-muted-foreground border border-border'}`}>
+                      <span className="font-medium">{f.label}</span>
+                      <Badge variant="outline" className="text-[10px] h-5">{deviceCount}</Badge>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Mobile layer dropdown */}
