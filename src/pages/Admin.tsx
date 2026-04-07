@@ -12,9 +12,9 @@ export default function Admin() {
   const { user } = useLogin();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Administration</h1>
+        <h1 className="text-xl md:text-2xl font-semibold">Administration</h1>
         <p className="text-muted-foreground text-sm mt-1">
           System configuration, user management, and settings
         </p>
@@ -53,7 +53,7 @@ export default function Admin() {
       )}
 
       <Tabs defaultValue="floorplans" className="w-full">
-        <TabsList>
+        <TabsList className="w-full overflow-x-auto justify-start">
           <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
           <TabsTrigger value="rbac" disabled={!hasRole('admin')}>
             Roles & Access {!hasRole('admin') && <Lock className="h-3 w-3 ml-1" />}

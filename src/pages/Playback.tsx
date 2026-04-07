@@ -25,9 +25,9 @@ export default function Playback() {
   const totalDuration = 120; // 2 hours in minutes
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Historical Playback</h1>
+        <h1 className="text-xl md:text-2xl font-semibold">Historical Playback</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Replay and analyze historical location data
         </p>
@@ -39,7 +39,7 @@ export default function Playback() {
           <CardTitle className="text-sm font-medium">Playback Range</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block">Start Date</label>
               <Input
