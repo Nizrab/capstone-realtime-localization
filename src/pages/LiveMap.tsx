@@ -60,11 +60,36 @@ const makeFloorSvg = (floor: FloorConfig) => {
   return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none" stroke-dasharray="8 4"/><text x="${w / 2}" y="${h / 2 - 10}" fill="#94a3b8" font-size="16" font-family="sans-serif" text-anchor="middle">${floor.label}</text></svg>`)}`;
 };
 
-function MapController({ bounds }: { bounds: L.LatLngBounds }) {
+function MapController({ bounds, isMobile }: { bounds: L.LatLngBounds; isMobile: boolean }) {
   const map = useMap();
+  const initialFitDone = useRef(false);
+
+  // Initial fit with delay to ensure container is measured
   useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+      map.fitBounds(bounds, { padding: [20, 20], animate: false });
+      initialFitDone.current = true;
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  // Refit on bounds change (floor toggle etc.)
+  useEffect(() => {
+    if (!initialFitDone.current) return;
+    map.invalidateSize();
     map.fitBounds(bounds, { padding: [20, 20], animate: true });
   }, [map, bounds]);
+
+  // Move zoom control position on mobile
+  useEffect(() => {
+    if (isMobile) {
+      // Remove default zoom control and re-add at bottomleft
+      map.zoomControl?.remove();
+      L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    }
+  }, [map, isMobile]);
+
   return null;
 }
 
@@ -211,15 +236,15 @@ export default function LiveMap() {
       {/* MAP */}
       <div className="flex-1 relative min-w-0">
         {/* Mobile floating search */}
-        <div className="absolute top-3 left-3 right-3 md:hidden z-[1000]">
+        <div className="absolute top-3 left-12 right-14 md:hidden z-[1000]">
           <div className="flex gap-1">
             <Input placeholder="Search device…" className="h-8 text-xs bg-card/90 backdrop-blur" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} />
             <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 bg-card/90" onClick={handleSearch}><Search className="h-3.5 w-3.5" /></Button>
           </div>
         </div>
 
-        <MapContainer center={mapCenter} zoom={1} className="h-full w-full bg-background [&_.leaflet-pane]:!z-[1] [&_.leaflet-control-container]:!z-[2]" crs={L.CRS.Simple} minZoom={-1} maxZoom={5} zoomControl={!isMobile}>
-          <MapController bounds={activeBounds} />
+        <MapContainer center={mapCenter} zoom={1} className="h-full w-full bg-background [&_.leaflet-pane]:!z-[1] [&_.leaflet-control-container]:!z-[2]" crs={L.CRS.Simple} minZoom={-1} maxZoom={5} zoomControl={true}>
+          <MapController bounds={activeBounds} isMobile={isMobile} />
           {floors.filter((f) => enabledFloors.has(f.id)).map((floor) => {
             const yOff = floorOffsets[floor.id] ?? 0;
             const bounds = L.latLngBounds([yOff, 0], [yOff + floor.heightMeters, floor.widthMeters]);
@@ -284,22 +309,37 @@ export default function LiveMap() {
 
         {/* Mobile floor bottom sheet */}
         {isMobile && showFloorSheet && (
-          <div className="absolute bottom-0 left-0 right-0 z-[1001] bg-card border-t border-border rounded-t-xl p-4 max-h-[50vh] overflow-y-auto shadow-2xl">
-            <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-3" />
-            <div className="text-xs text-muted-foreground font-medium mb-2">Floors</div>
-            <div className="space-y-2">
-              {floors.map((f) => {
-                const isEnabled = enabledFloors.has(f.id);
-                const deviceCount = devices.filter((d) => d.floorId === f.id).length;
-                return (
-                  <button key={f.id} onClick={() => toggleFloor(f.id)} className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${isEnabled ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-secondary/50 text-muted-foreground border border-border'}`}>
-                    <span className="font-medium">{f.label}</span>
-                    <Badge variant="outline" className="text-[10px] h-5">{deviceCount}</Badge>
-                  </button>
-                );
-              })}
+          <>
+            <div className="absolute inset-0 z-[1001] bg-black/40" onClick={() => setShowFloorSheet(false)} />
+            <div
+              className="absolute bottom-0 left-0 right-0 z-[1002] bg-card border-t border-border rounded-t-xl p-4 max-h-[50vh] overflow-y-auto shadow-2xl"
+              onTouchStart={(e) => {
+                const startY = e.touches[0].clientY;
+                const el = e.currentTarget;
+                const handleMove = (ev: TouchEvent) => {
+                  const dy = ev.touches[0].clientY - startY;
+                  if (dy > 80) { setShowFloorSheet(false); el.removeEventListener('touchmove', handleMove); }
+                };
+                el.addEventListener('touchmove', handleMove, { passive: true });
+                el.addEventListener('touchend', () => el.removeEventListener('touchmove', handleMove), { once: true });
+              }}
+            >
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/40 mx-auto mb-3 cursor-grab" />
+              <div className="text-xs text-muted-foreground font-medium mb-2">Floors</div>
+              <div className="space-y-2">
+                {floors.map((f) => {
+                  const isEnabled = enabledFloors.has(f.id);
+                  const deviceCount = devices.filter((d) => d.floorId === f.id).length;
+                  return (
+                    <button key={f.id} onClick={() => toggleFloor(f.id)} className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${isEnabled ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-secondary/50 text-muted-foreground border border-border'}`}>
+                      <span className="font-medium">{f.label}</span>
+                      <Badge variant="outline" className="text-[10px] h-5">{deviceCount}</Badge>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Mobile layer dropdown */}
