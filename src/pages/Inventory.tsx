@@ -6,23 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { useRTLSStore } from '@/store/useRTLSStore';
 import { fetchAnchors, fetchTags, type APIAnchor, type APITag } from '@/lib/api';
 import StatusBadge from '@/components/StatusBadge';
-import { Search, Download, Wifi, RefreshCw } from 'lucide-react';
+import { Search, Download, Wifi, RefreshCw, Radio, Tag as TagIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import type { Anchor, Tag } from '@/types/rtls';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-
-interface NetworkDevice {
-  id: string;
-  label: string;
-  ip: string;
-  mac: string;
-  status: string;
-  lastSeen: string;
-}
 
 function mapAPIAnchor(a: APIAnchor): Anchor {
   return {
@@ -51,16 +39,24 @@ function mapAPITag(t: APITag): Tag {
   };
 }
 
+function getRssiColor(rssi: number): string {
+  if (rssi > -60) return 'text-green-400';
+  if (rssi > -80) return 'text-yellow-400';
+  return 'text-red-400';
+}
+
+function getRssiBgColor(rssi: number): string {
+  if (rssi > -60) return 'bg-green-500/10 border-green-500/20';
+  if (rssi > -80) return 'bg-yellow-500/10 border-yellow-500/20';
+  return 'bg-red-500/10 border-red-500/20';
+}
+
 export default function Inventory() {
   const { anchors, tags, setAnchors, setTags } = useRTLSStore();
-  const { hasRole } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [anchorSearch, setAnchorSearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
-  const [networkSearch, setNetworkSearch] = useState('');
-  const [networkDevices, setNetworkDevices] = useState<NetworkDevice[]>([]);
-  const [networkLoading, setNetworkLoading] = useState(false);
-  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [rfSearch, setRfSearch] = useState('');
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,25 +82,6 @@ export default function Inventory() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [loadData]);
 
-  const fetchNetworkDevices = useCallback(async () => {
-    if (!API_BASE_URL) {
-      setNetworkError('API URL not configured');
-      return;
-    }
-    setNetworkLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/devices/network`, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setNetworkDevices(data.devices || []);
-      setNetworkError(null);
-    } catch (err: any) {
-      setNetworkError(err.message || 'Failed to fetch');
-    } finally {
-      setNetworkLoading(false);
-    }
-  }, []);
-
   const urlTab = searchParams.get('tab');
   const urlHighlight = searchParams.get('highlight');
   const [activeTab, setActiveTab] = useState(urlTab || 'anchors');
@@ -119,13 +96,6 @@ export default function Inventory() {
     }
   }, [urlTab, urlHighlight, setSearchParams]);
 
-  useEffect(() => {
-    if (activeTab !== 'network' || !hasRole('admin')) return;
-    fetchNetworkDevices();
-    const interval = setInterval(fetchNetworkDevices, 5000);
-    return () => clearInterval(interval);
-  }, [activeTab, hasRole, fetchNetworkDevices]);
-
   const filteredAnchors = anchors.filter(
     (a) =>
       a.label.toLowerCase().includes(anchorSearch.toLowerCase()) ||
@@ -138,15 +108,26 @@ export default function Inventory() {
       t.id.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
-  const filteredNetwork = networkDevices.filter(
-    (d) =>
-      d.id.toLowerCase().includes(networkSearch.toLowerCase()) ||
-      d.label.toLowerCase().includes(networkSearch.toLowerCase()) ||
-      d.ip.toLowerCase().includes(networkSearch.toLowerCase()) ||
-      d.mac.toLowerCase().includes(networkSearch.toLowerCase())
+  // RF Environment filtered data
+  const rfSearchLower = rfSearch.toLowerCase();
+  const rfFilteredAnchors = anchors.filter(
+    (a) =>
+      a.label.toLowerCase().includes(rfSearchLower) ||
+      a.id.toLowerCase().includes(rfSearchLower) ||
+      String(a.rssi ?? '').includes(rfSearchLower)
+  );
+  const rfFilteredTags = tags.filter(
+    (t) =>
+      t.label.toLowerCase().includes(rfSearchLower) ||
+      t.id.toLowerCase().includes(rfSearchLower)
   );
 
-  const isAdmin = hasRole('admin');
+  // RF stats
+  const onlineAnchors = anchors.filter((a) => a.status === 'online').length;
+  const anchorsWithRssi = anchors.filter((a) => a.rssi != null);
+  const avgRssi = anchorsWithRssi.length > 0
+    ? Math.round(anchorsWithRssi.reduce((sum, a) => sum + (a.rssi ?? 0), 0) / anchorsWithRssi.length)
+    : null;
 
   const handleExportCSV = () => {
     let csvContent = '';
@@ -159,17 +140,20 @@ export default function Inventory() {
       });
       filename = 'anchors.csv';
     } else if (activeTab === 'tags') {
-      csvContent = 'ID,Label,Technology,Status,Position X,Position Y,Floor,Room,Confidence,Firmware,Last Seen\n';
+      csvContent = 'ID,Label,Technology,Status,Position X,Position Y,Firmware,Last Seen\n';
       tags.forEach((t) => {
-        csvContent += `${t.id},${t.label},${t.tech},${t.status ?? ''},${t.position?.x ?? ''},${t.position?.y ?? ''},,,,${t.firmware},${new Date(t.lastSeen).toLocaleString()}\n`;
+        csvContent += `${t.id},${t.label},${t.tech},${t.status ?? ''},${t.position?.x ?? ''},${t.position?.y ?? ''},${t.firmware},${new Date(t.lastSeen).toLocaleString()}\n`;
       });
       filename = 'tags.csv';
-    } else if (activeTab === 'network') {
-      csvContent = 'ID,Label,IP Address,MAC Address,Status,Last Seen\n';
-      networkDevices.forEach((d) => {
-        csvContent += `${d.id},${d.label},${d.ip},${d.mac},${d.status},${new Date(d.lastSeen).toLocaleString()}\n`;
+    } else if (activeTab === 'rf') {
+      csvContent = 'Type,ID,Label,Status,RSSI,Last Seen\n';
+      anchors.forEach((a) => {
+        csvContent += `AP,${a.id},${a.label},${a.status},${a.rssi ?? ''},${new Date(a.lastSeen).toLocaleString()}\n`;
       });
-      filename = 'network_devices.csv';
+      tags.forEach((t) => {
+        csvContent += `Device,${t.id},${t.label},${t.status ?? ''},,${new Date(t.lastSeen).toLocaleString()}\n`;
+      });
+      filename = 'rf_environment.csv';
     }
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -216,14 +200,13 @@ export default function Inventory() {
           <TabsTrigger value="tags">
             Tags ({tags.length})
           </TabsTrigger>
-          {isAdmin && (
-            <TabsTrigger value="network">
-              <Wifi className="h-3.5 w-3.5 mr-1.5" />
-              Network
-            </TabsTrigger>
-          )}
+          <TabsTrigger value="rf">
+            <Wifi className="h-3.5 w-3.5 mr-1.5" />
+            RF Environment
+          </TabsTrigger>
         </TabsList>
 
+        {/* Anchors Tab */}
         <TabsContent value="anchors" className="space-y-4">
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -275,9 +258,7 @@ export default function Inventory() {
                           <td className="py-3 font-mono text-xs">{anchor.id}</td>
                           <td className="py-3 font-medium">{anchor.label}</td>
                           <td className="py-3">
-                            <Badge variant="outline" className="text-xs">
-                              {anchor.tech}
-                            </Badge>
+                            <Badge variant="outline" className="text-xs">{anchor.tech}</Badge>
                           </td>
                           <td className="py-3">
                             <StatusBadge status={anchor.status} />
@@ -297,6 +278,7 @@ export default function Inventory() {
           </Card>
         </TabsContent>
 
+        {/* Tags Tab */}
         <TabsContent value="tags" className="space-y-4">
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -349,9 +331,7 @@ export default function Inventory() {
                           <td className="py-3 font-mono text-xs">{tag.id}</td>
                           <td className="py-3 font-medium">{tag.label}</td>
                           <td className="py-3">
-                            <Badge variant="outline" className="text-xs">
-                              {tag.tech}
-                            </Badge>
+                            <Badge variant="outline" className="text-xs">{tag.tech}</Badge>
                           </td>
                           <td className="py-3">
                             <StatusBadge status={(tag.status as any) || 'online'} />
@@ -374,76 +354,152 @@ export default function Inventory() {
           </Card>
         </TabsContent>
 
-        {isAdmin && (
-          <TabsContent value="network" className="space-y-4">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by ID, IP, or MAC..."
-                value={networkSearch}
-                onChange={(e) => setNetworkSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
+        {/* RF Environment Tab */}
+        <TabsContent value="rf" className="space-y-4">
+          {/* Network Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  Network Devices ({filteredNetwork.length})
-                  {networkLoading && (
-                    <Badge variant="outline" className="text-xs animate-pulse">Fetching…</Badge>
-                  )}
-                  {networkError && (
-                    <Badge variant="destructive" className="text-xs">{networkError}</Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {filteredNetwork.length === 0 && !networkLoading ? (
-                  <div className="text-center py-8 text-muted-foreground text-sm">
-                    {networkError
-                      ? 'Unable to fetch network devices. Check API configuration.'
-                      : 'No network devices found.'}
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="border-b border-border">
-                        <tr className="text-left">
-                          <th className="pb-3 font-medium text-muted-foreground">ID</th>
-                          <th className="pb-3 font-medium text-muted-foreground">Label</th>
-                          <th className="pb-3 font-medium text-muted-foreground">IP Address</th>
-                          <th className="pb-3 font-medium text-muted-foreground">MAC Address</th>
-                          <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                          <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredNetwork.map((device) => (
-                          <tr
-                            key={device.id}
-                            className="border-b border-border last:border-0 hover:bg-muted/50"
-                          >
-                            <td className="py-3 font-mono text-xs">{device.id}</td>
-                            <td className="py-3 font-medium">{device.label}</td>
-                            <td className="py-3 font-mono text-xs">{device.ip}</td>
-                            <td className="py-3 font-mono text-xs uppercase">{device.mac}</td>
-                            <td className="py-3">
-                              <StatusBadge status={device.status as any} />
-                            </td>
-                            <td className="py-3 text-xs text-muted-foreground">
-                              {new Date(device.lastSeen).toLocaleTimeString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Radio className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Active APs</span>
+                </div>
+                <div className="text-2xl font-bold font-mono">
+                  {onlineAnchors}<span className="text-sm text-muted-foreground font-normal">/{anchors.length}</span>
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        )}
+            <Card>
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <TagIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Tracked Devices</span>
+                </div>
+                <div className="text-2xl font-bold font-mono">{tags.length}</div>
+              </CardContent>
+            </Card>
+            <Card className={cn("border", avgRssi !== null && getRssiBgColor(avgRssi))}>
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Wifi className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Avg Signal</span>
+                </div>
+                <div className={cn("text-2xl font-bold font-mono", avgRssi !== null ? getRssiColor(avgRssi) : 'text-muted-foreground')}>
+                  {avgRssi !== null ? `${avgRssi} dBm` : '—'}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Search */}
+          <div className="relative w-full md:max-w-md">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search APs or devices by name, ID, or RSSI..."
+              value={rfSearch}
+              onChange={(e) => setRfSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          {/* System Access Points */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Radio className="h-4 w-4" />
+                System Access Points ({rfFilteredAnchors.length})
+                {loading && <Badge variant="outline" className="ml-2 text-xs animate-pulse">Updating…</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rfFilteredAnchors.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground text-sm">No access points found.</div>
+              ) : (
+                <div className="overflow-x-auto -mx-4 md:mx-0">
+                  <table className="w-full text-xs md:text-sm min-w-[500px]">
+                    <thead className="border-b border-border">
+                      <tr className="text-left">
+                        <th className="pb-3 font-medium text-muted-foreground">AP Name</th>
+                        <th className="pb-3 font-medium text-muted-foreground">RSSI</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Status</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rfFilteredAnchors.map((a) => (
+                        <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                          <td className="py-3 font-medium">{a.label}</td>
+                          <td className={cn("py-3 font-mono text-xs", a.rssi != null ? getRssiColor(a.rssi) : '')}>
+                            {a.rssi != null ? `${a.rssi} dBm` : '—'}
+                          </td>
+                          <td className="py-3">
+                            <div className="flex items-center gap-2">
+                              <span className={cn("inline-block w-2 h-2 rounded-full", a.status === 'online' ? 'bg-green-500' : 'bg-red-500')} />
+                              <span className="text-xs capitalize">{a.status}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 text-xs text-muted-foreground">
+                            {new Date(a.lastSeen).toLocaleTimeString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Detected Devices */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TagIcon className="h-4 w-4" />
+                Detected Devices ({rfFilteredTags.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rfFilteredTags.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground text-sm">No devices detected.</div>
+              ) : (
+                <div className="overflow-x-auto -mx-4 md:mx-0">
+                  <table className="w-full text-xs md:text-sm min-w-[600px]">
+                    <thead className="border-b border-border">
+                      <tr className="text-left">
+                        <th className="pb-3 font-medium text-muted-foreground">Device</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Floor / Room</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Position</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Confidence</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Last Seen</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rfFilteredTags.map((t) => (
+                        <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                          <td className="py-3 font-medium">{t.label}</td>
+                          <td className="py-3 text-xs text-muted-foreground">
+                            {(t.position as any)?.floor ?? '—'} / {(t.position as any)?.room ?? '—'}
+                          </td>
+                          <td className="py-3 font-mono text-xs">
+                            {t.position ? `(${t.position.x.toFixed(1)}, ${t.position.y.toFixed(1)})` : '—'}
+                          </td>
+                          <td className="py-3 font-mono text-xs">
+                            {(t.position as any)?.confidence != null
+                              ? `${((t.position as any).confidence * 100).toFixed(0)}%`
+                              : '—'}
+                          </td>
+                          <td className="py-3 text-xs text-muted-foreground">
+                            {new Date(t.lastSeen).toLocaleTimeString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
