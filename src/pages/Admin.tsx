@@ -81,12 +81,12 @@ export default function Admin() {
                   { role: 'Nurse', description: 'Read-only access to device list, live map, alerts, and overview dashboards', users: 12 },
                   { role: 'Backend', description: 'API performance monitoring, backend health status, database metrics', users: 3 },
                 ].map(({ role, description, users }) => (
-                  <div key={role} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                    <div>
+                  <div key={role} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border border-border rounded-lg">
+                    <div className="min-w-0 flex-1">
                       <div className="font-medium text-sm">{role}</div>
-                      <div className="text-xs text-muted-foreground">{description}</div>
+                      <div className="text-xs text-muted-foreground break-words">{description}</div>
                     </div>
-                    <Badge variant="outline">{users} users</Badge>
+                    <Badge variant="outline" className="self-start sm:self-center shrink-0">{users} users</Badge>
                   </div>
                 ))}
               </div>

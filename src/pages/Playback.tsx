@@ -187,7 +187,7 @@ export default function Playback() {
           </div>
 
           {/* Speed Control */}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="text-sm text-muted-foreground">Speed:</span>
             {[0.5, 0.75, 1, 1.25, 1.5].map((s) => (
               <Button
@@ -195,7 +195,7 @@ export default function Playback() {
                 variant={speed === s ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSpeed(s)}
-                className="font-mono"
+                className="font-mono text-xs sm:text-sm px-2 sm:px-3"
               >
                 {s}x
               </Button>
