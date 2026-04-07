@@ -236,7 +236,7 @@ export default function LiveMap() {
       {/* MAP */}
       <div className="flex-1 relative min-w-0">
         {/* Mobile floating search */}
-        <div className="absolute top-3 left-3 right-3 md:hidden z-[1000]">
+        <div className="absolute top-3 left-12 right-14 md:hidden z-[1000]">
           <div className="flex gap-1">
             <Input placeholder="Search device…" className="h-8 text-xs bg-card/90 backdrop-blur" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} />
             <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 bg-card/90" onClick={handleSearch}><Search className="h-3.5 w-3.5" /></Button>
