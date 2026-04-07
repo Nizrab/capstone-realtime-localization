@@ -67,7 +67,7 @@ export default function Overview() {
       <div>
         <h1 className="text-2xl font-semibold">System Overview</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Real-time monitoring — Carleton University Canal Building RTLS
+          Real-time indoor positioning monitoring
         </p>
         {error && (
           <p className="text-destructive text-xs mt-1 flex items-center gap-1">

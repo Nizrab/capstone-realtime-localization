@@ -67,6 +67,9 @@ export default function SidebarLatency() {
       <div className="text-[10px] text-muted-foreground">
         Pipeline: Backend → Admin → Client 
       </div>
+      <div className="text-[10px] text-muted-foreground/60 pt-1">
+        canadianhealth.site
+      </div>
     </div>
   );
 }

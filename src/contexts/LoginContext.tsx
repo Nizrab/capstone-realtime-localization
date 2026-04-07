@@ -17,7 +17,7 @@ interface LoginContextType {
 const LoginContext = createContext<LoginContextType | undefined>(undefined);
 
 const INACTIVITY_TIMEOUT = 3 * 60 * 1000; // 3 minutes
-const LAST_ACTIVITY_KEY = 'rtls_last_activity';
+const LAST_ACTIVITY_KEY = 'ch_last_activity';
 
 export function LoginProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {

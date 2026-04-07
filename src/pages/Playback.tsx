@@ -225,28 +225,8 @@ export default function Playback() {
           <CardTitle className="text-sm font-medium">Event Timeline</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-2 border-l-2 border-severity-critical pl-3">
-              <span className="font-mono text-xs text-muted-foreground">11:23:45</span>
-              <Badge variant="outline" className="severity-critical">
-                Geofence Breach
-              </Badge>
-              <span className="text-sm">Patient-A1 left ICU zone</span>
-            </div>
-            <div className="flex items-center gap-3 p-2 border-l-2 border-severity-warning pl-3">
-              <span className="font-mono text-xs text-muted-foreground">11:45:12</span>
-              <Badge variant="outline" className="severity-warning">
-                Low Battery
-              </Badge>
-              <span className="text-sm">T-025 battery at 8%</span>
-            </div>
-            <div className="flex items-center gap-3 p-2 border-l-2 border-severity-info pl-3">
-              <span className="font-mono text-xs text-muted-foreground">12:10:33</span>
-              <Badge variant="outline" className="severity-info">
-                Location Update
-              </Badge>
-              <span className="text-sm">Tag positions updated</span>
-            </div>
+          <div className="text-sm text-muted-foreground text-center py-8">
+            No events recorded. Events will appear here when playback data is loaded.
           </div>
         </CardContent>
       </Card>
