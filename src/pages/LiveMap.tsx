@@ -244,7 +244,7 @@ export default function LiveMap() {
         </div>
 
         <MapContainer center={mapCenter} zoom={1} className="h-full w-full bg-background [&_.leaflet-pane]:!z-[1] [&_.leaflet-control-container]:!z-[2]" crs={L.CRS.Simple} minZoom={-1} maxZoom={5} zoomControl={!isMobile}>
-          <MapController bounds={activeBounds} />
+          <MapController bounds={activeBounds} isMobile={isMobile} />
           {floors.filter((f) => enabledFloors.has(f.id)).map((floor) => {
             const yOff = floorOffsets[floor.id] ?? 0;
             const bounds = L.latLngBounds([yOff, 0], [yOff + floor.heightMeters, floor.widthMeters]);
