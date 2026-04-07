@@ -92,9 +92,9 @@ export default function Dashboards() {
     latencyMs === null ? 'red' : latencyMs < 200 ? 'green' : latencyMs < 500 ? 'yellow' : 'red';
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Dashboards</h1>
+        <h1 className="text-xl md:text-2xl font-semibold">Dashboards</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Live system metrics — polling every 10s
         </p>
@@ -109,7 +109,7 @@ export default function Dashboards() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-xs text-muted-foreground">Avg Confidence</div>
               <div className={`text-2xl font-bold font-mono ${colorClass(confidenceLevel(avgPct))}`}>{avgPct}%</div>
@@ -132,7 +132,7 @@ export default function Dashboards() {
       {/* 2. System Health */}
       <div>
         <h2 className="text-lg font-semibold mb-4">System Health</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* API Latency */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -264,7 +264,7 @@ export default function Dashboards() {
           <CardTitle className="text-sm font-medium">Pipeline Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center gap-4 py-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 py-4">
             {/* Engine */}
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center gap-2">
