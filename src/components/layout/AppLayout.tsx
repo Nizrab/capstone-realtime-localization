@@ -122,9 +122,9 @@ export default function AppLayout() {
 
       {/* Mobile Sidebar Overlay */}
       {isMobile && sidebarOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative w-64 bg-sidebar flex flex-col z-10 animate-in slide-in-from-left duration-200">
+        <div className="fixed inset-0 z-[2000] flex md:hidden">
+        <div className="absolute inset-0 bg-black/60 z-[2000]" onClick={() => setSidebarOpen(false)} />
+          <aside className="relative w-64 bg-sidebar flex flex-col z-[2001] animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </aside>
         </div>
@@ -168,7 +168,7 @@ export default function AppLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto pb-10 md:pb-0">
+        <main className="flex-1 overflow-auto overflow-x-hidden pb-10 md:pb-0">
           <Outlet />
         </main>
 
