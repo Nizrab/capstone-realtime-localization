@@ -60,11 +60,36 @@ const makeFloorSvg = (floor: FloorConfig) => {
   return `data:image/svg+xml,${encodeURIComponent(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#f8fafc"/><rect width="${w}" height="${h}" stroke="#334155" stroke-width="3" fill="none" stroke-dasharray="8 4"/><text x="${w / 2}" y="${h / 2 - 10}" fill="#94a3b8" font-size="16" font-family="sans-serif" text-anchor="middle">${floor.label}</text></svg>`)}`;
 };
 
-function MapController({ bounds }: { bounds: L.LatLngBounds }) {
+function MapController({ bounds, isMobile }: { bounds: L.LatLngBounds; isMobile: boolean }) {
   const map = useMap();
+  const initialFitDone = useRef(false);
+
+  // Initial fit with delay to ensure container is measured
   useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+      map.fitBounds(bounds, { padding: [20, 20], animate: false });
+      initialFitDone.current = true;
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  // Refit on bounds change (floor toggle etc.)
+  useEffect(() => {
+    if (!initialFitDone.current) return;
+    map.invalidateSize();
     map.fitBounds(bounds, { padding: [20, 20], animate: true });
   }, [map, bounds]);
+
+  // Move zoom control position on mobile
+  useEffect(() => {
+    if (isMobile) {
+      // Remove default zoom control and re-add at bottomleft
+      map.zoomControl?.remove();
+      L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    }
+  }, [map, isMobile]);
+
   return null;
 }
 
