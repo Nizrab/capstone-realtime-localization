@@ -28,10 +28,11 @@ export default function Login() {
       <Card className="w-full max-w-md p-8 space-y-6">
         <div className="flex flex-col items-center space-y-2">
           <div className="flex items-center gap-2">
-            <MapPin className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">RTLS Pilot Monitor</h1>
+            <span className="text-primary text-3xl">🍁</span>
+            <h1 className="text-2xl font-bold">Canadian Health</h1>
           </div>
-          <p className="text-sm text-muted-foreground">Sign in to your account</p>
+          <p className="text-sm text-muted-foreground">Indoor Tracking</p>
+          <p className="text-xs text-muted-foreground">Real-time indoor positioning for Canadian healthcare facilities</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
